@@ -5,10 +5,10 @@ namespace Svan.Monads
     public static class OptionExtensions
     {
         /// <summary>
-        /// Converts any type <c>T</c> to <c>Option<T></c>. 
+        /// Converts any type <c>T</c> to <c>Option&lt;T&gt;</c>. 
         /// </summary>
-        /// <returns>Returns <c>Some<T></c> for value types.
-        /// Returns <c>Some<T></c> for reference types that are not <c>default</c> and <c>None</c> for reference types that are <c>default</c>.</returns>
+        /// <returns>Returns <c>Some&lt;T&gt;</c> for value types.
+        /// Returns <c>Some&lt;T&gt;</c> for reference types that are not <c>default</c> and <c>None</c> for reference types that are <c>default</c>.</returns>
         public static Option<T> ToOption<T>(this T value)
         {
             Option<T> result;

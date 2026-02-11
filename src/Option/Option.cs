@@ -5,7 +5,7 @@ using OneOf;
 namespace Svan.Monads
 {
     /// <summary>
-    /// Represents some value of type T
+    /// Represents some value of type <c>T</c>
     /// </summary>
     public struct Some<T>
     {
@@ -22,7 +22,7 @@ namespace Svan.Monads
     public struct None { };
 
     /// <summary>
-    /// Union of <c>None</c> and <c>Some<T></c> with monad features for the Maybe flow control
+    /// Union of <c>None</c> and <c>Some&lt;T&gt;</c> with monad features for the Maybe flow control
     /// </summary>
     public class Option<T> : OneOfBase<None, Some<T>>
     {
@@ -36,6 +36,45 @@ namespace Svan.Monads
 
         public bool IsNone() => this.IsT0;
         public bool IsSome() => this.IsT1;
+        
+        public static class Delegates
+        {
+            public delegate Option<TOut> Bind<TOut>(T value);
+            public delegate TOut Map<out TOut>(T value);
+            public delegate bool Filter(T value);
+            public delegate void DoWithValue(T value);
+            public delegate void DoWithoutValue();
+            public delegate TOut FoldNone<out TOut>();
+            public delegate TOut FoldSome<out TOut>(T value);
+            public delegate T Default();
+            public delegate TError DefaultError<out TError>();
+            
+            public delegate TOut Combine<in TFirstOther, out TOut>(
+                T input,
+                TFirstOther firstOther
+            );
+            
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, out TOut>(
+                T input,
+                TFirstOther firstOther,
+                TSecondOther secondOther
+            );
+            
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, in TThirdOther, out TOut>(
+                T input,
+                TFirstOther firstOther,
+                TSecondOther secondOther,
+                TThirdOther thirdOther
+            );
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, in TThirdOther, in TFourthOther, out TOut>(
+                T input,
+                TFirstOther firstOther,
+                TSecondOther secondOther,
+                TThirdOther thirdOther,
+                TFourthOther fourthOther
+                );
+        }
+
 
         /// <summary>
         /// Returns the current value. Will throw <c>NullReferenceException</c> if current option state is None.
@@ -43,22 +82,22 @@ namespace Svan.Monads
         new public T Value() => IsSome() ? this.AsT1.Value : throw new NullReferenceException();
 
         /// <summary>
-        /// Bind the <c>Option<T></c> to an <c>Option<TOut></c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
+        /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
         /// </summary>
-        /// <param name="binder">A function that returns an <c>Option<TOut></c></param>
+        /// <param name="binder">A function that returns an <c>Option&lt;TOut&gt;</c></param>
         /// <returns>An option of the output type of the binder. </returns>
-        public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
+        public Option<TOut> Bind<TOut>(Delegates.Bind<TOut> binder)
             => Match(
                 none => none,
                 some => binder(some.Value));
 
         /// <summary>
-        /// Map the value of the option to an <c>Option<TOut></c> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
+        /// Map the value of the option to an <c>Option&lt;TOut&gt;</c> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
         /// </summary>
         /// <param name="mapping">A function that returns a value of <c>TOut</c></param>
         /// <typeparam name="TOut"></typeparam>
         /// <returns>An option of the output type of the mapping</returns>
-        public Option<TOut> Map<TOut>(Func<T, TOut> mapping)
+        public Option<TOut> Map<TOut>(Delegates.Map<TOut> mapping)
             => Match(
                 none => Option<TOut>.None(),
                 some => Option<TOut>.Some(mapping(some.Value)));
@@ -68,17 +107,17 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="filter"></param>
         /// <returns><c>Some</c> when filter returns true. <c>None</c> when filter returns false or current state of option is <c>None</c></returns>
-        public Option<T> Filter(Func<T, bool> filter)
+        public Option<T> Filter(Delegates.Filter filter)
             => Match(
                 none => none,
                 some => filter(some.Value) ? some : None());
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is Some<T>
+        /// Do let's you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
         /// </summary>
         /// <param name="do">An action that takes a single parameter of T</param>
         /// <returns>The current state of the Option</returns>
-        public Option<T> Do(Action<T> @do)
+        public Option<T> Do(Delegates.DoWithValue @do)
         {
             if (IsSome())
             {
@@ -93,7 +132,7 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes no parameters</param>
         /// <returns>The current state of the Option</returns>
-        public Option<T> DoIfNone(Action @do)
+        public Option<T> DoIfNone(Delegates.DoWithoutValue @do)
         {
             if (IsNone())
             {
@@ -106,7 +145,7 @@ namespace Svan.Monads
         /// <summary>
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>None</c> and case <c>Some</c>.
         /// </summary>
-        public TOut Fold<TOut>(Func<TOut> caseNone, Func<T, TOut> caseSome)
+        public TOut Fold<TOut>(Delegates.FoldNone<TOut> caseNone, Delegates.FoldSome<TOut> caseSome)
             => Match(
                 none => caseNone(),
                 some => caseSome(some.Value));
@@ -114,7 +153,7 @@ namespace Svan.Monads
         /// <summary>
         /// Get the value of <c>Some</c> or a default value from the supplied function.
         /// </summary>
-        public T DefaultWith(Func<T> defaultNone)
+        public T DefaultWith(Delegates.Default defaultNone)
             => Match(
                 none => defaultNone(),
                 some => some.Value);
@@ -130,11 +169,11 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several options into a new option or <c>None</c> if any of the provided options are <c>None</c>
         /// </summary>
-        public Option<TOut> Zip<TOut, TOther>(Option<TOther> other, Func<T, TOther, TOut> combine)
+        public Option<TOut> Zip<TOut, TOther>(Option<TOther> other, Delegates.Combine<TOther, TOut> combine)
         {
             if (this.IsSome() && other.IsSome())
             {
-                return combine(this.Value(), other.Value());
+                return combine(Value(), other.Value());
             }
 
             return Option<TOut>.None();
@@ -146,11 +185,11 @@ namespace Svan.Monads
         public Option<TOut> Zip<TOut, TFirstOther, TSecondOther>(
             Option<TFirstOther> firstOther,
             Option<TSecondOther> secondOther,
-            Func<T, TFirstOther, TSecondOther, TOut> combine)
+            Delegates.Combine<TFirstOther, TSecondOther, TOut> combine)
         {
             if (this.IsSome() && firstOther.IsSome() && secondOther.IsSome())
             {
-                return combine(this.Value(), firstOther.Value(), secondOther.Value());
+                return combine(Value(), firstOther.Value(), secondOther.Value());
             }
 
             return Option<TOut>.None();
@@ -163,7 +202,7 @@ namespace Svan.Monads
             Option<TFirstOther> firstOther,
             Option<TSecondOther> secondOther,
             Option<TThirdOther> thirdOther,
-            Func<T, TFirstOther, TSecondOther, TThirdOther, TOut> combine)
+            Delegates.Combine<TFirstOther, TSecondOther, TThirdOther, TOut> combine)
         {
             if (this.IsSome()
                 && firstOther.IsSome()
@@ -171,7 +210,7 @@ namespace Svan.Monads
                 && thirdOther.IsSome())
             {
                 return combine(
-                    this.Value(),
+                    Value(),
                     firstOther.Value(),
                     secondOther.Value(),
                     thirdOther.Value());
@@ -188,7 +227,7 @@ namespace Svan.Monads
             Option<TSecondOther> secondOther,
             Option<TThirdOther> thirdOther,
             Option<TFourthOther> fourthOther,
-            Func<T, TFirstOther, TSecondOther, TThirdOther, TFourthOther, TOut> combine)
+            Delegates.Combine<TFirstOther, TSecondOther, TThirdOther, TFourthOther, TOut> combine)
         {
             if (this.IsSome()
                 && firstOther.IsSome()
@@ -197,7 +236,7 @@ namespace Svan.Monads
                 && fourthOther.IsSome())
             {
                 return combine(
-                    this.Value(),
+                    Value(),
                     firstOther.Value(),
                     secondOther.Value(),
                     thirdOther.Value(),
@@ -208,10 +247,10 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Create a <c>Result<TError, T></c> from an Option<T> by supplying a mapper for the error case
+        /// Create a <c>Result&lt;TError, T&gt;</c> from an <c>Option&lt;T&gt;</c> by supplying a mapper for the error case
         /// </summary>
 
-        public Result<TError, T> ToResult<TError>(Func<TError> defaultError)
+        public Result<TError, T> ToResult<TError>(Delegates.DefaultError<TError> defaultError)
          => this.Fold<Result<TError, T>>(
                 () => defaultError(),
                 (value) => value
