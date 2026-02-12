@@ -1,0 +1,24 @@
+using System;
+using System.Threading.Tasks;
+
+namespace Svan.Monads
+{
+    public static class AsyncResultExtensions
+    {
+        public static async Task<Result<TError, TOut>> BindAsync<TError, TSuccess, TOut>(
+            this Task<Result<TError, TSuccess>> resultTask,
+            Func<TSuccess, Task<Result<TError, TOut>>> binder)
+        {
+            var result = await resultTask;
+            return result.IsSuccess() ? await binder(result.SuccessValue()) : Result<TError, TOut>.Error(result.ErrorValue());
+        }
+
+        public static async Task<Result<TError, TOut>> MapAsync<TError, TSuccess, TOut>(
+            this Task<Result<TError, TSuccess>> resultTask,
+            Func<TSuccess, Task<TOut>> mapper)
+        {
+            var result = await resultTask;
+            return result.IsSuccess() ? Result<TError, TOut>.Success(await mapper(result.SuccessValue())) : Result<TError, TOut>.Error(result.ErrorValue());
+        }
+    }
+}
