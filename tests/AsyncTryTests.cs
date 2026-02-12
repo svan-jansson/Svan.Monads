@@ -105,5 +105,31 @@ namespace Svan.Monads.UnitTest
 
             Assert.Equal("computed: 10", message);
         }
+ 
+        [Fact]
+        public async Task Sequence_enables_sync_map_with_async_function()
+        {
+            // When starting from a sync Try, Map with an async function
+            // produces Try<Task<T>>. Sequence flips it so we can await.
+            Try<int> value = Try.Catching(() => 10);
+
+            var result = await value
+                .Map(FormatResult)
+                .Sequence();
+
+            Assert.Equal("result: 10", result.SuccessValue());
+        }
+
+        [Fact]
+        public async Task Sequence_skips_the_async_work_on_error()
+        {
+            Try<int> value = Try.Catching<int>(() => throw new InvalidOperationException("boom"));
+
+            var result = await value
+                .Map(FormatResult)
+                .Sequence();
+
+            Assert.Equal("boom", result.ErrorValue().Message);
+        }
     }
 }
