@@ -30,7 +30,8 @@ namespace Svan.Monads.UnitTest
         public async Task Await_then_map_and_fold()
         {
             var result = (await ParseNumber("5"))
-                .Fold(error => -1, n => n * 2);
+                .Map(n => n * 2)
+                .Fold(error => -1, n => n);
 
             Assert.Equal(10, result);
         }
@@ -99,9 +100,8 @@ namespace Svan.Monads.UnitTest
         {
             var message = (await ParseNumber("10")
                     .BindAsync(SafeDivide))
-                .Fold(
-                    error => $"failed: {error.Message}",
-                    n => $"computed: {n}");
+                .Map(n => $"computed: {n}")
+                .DefaultWith(error => $"failed: {error.Message}");
 
             Assert.Equal("computed: 10", message);
         }
