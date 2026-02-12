@@ -5,6 +5,18 @@ namespace Svan.Monads
 {
     public static class AsyncResultExtensions
     {
+        public static async Task<Result<TError, TSuccess>> Sequence<TError, TSuccess>(
+            this Result<TError, Task<TSuccess>> resultTask)
+        {
+            if (resultTask.IsError())
+            {
+                return Result<TError, TSuccess>.Error(resultTask.ErrorValue());
+            }
+
+            var value = await resultTask.SuccessValue();
+            return Result<TError, TSuccess>.Success(value);
+        }
+
         public static async Task<Result<TError, TOut>> BindAsync<TError, TSuccess, TOut>(
             this Task<Result<TError, TSuccess>> resultTask,
             Func<TSuccess, Task<Result<TError, TOut>>> binder)

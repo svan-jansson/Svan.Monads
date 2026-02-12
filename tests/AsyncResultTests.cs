@@ -116,5 +116,32 @@ namespace Svan.Monads.UnitTest
 
             Assert.Equal("Welcome, varmkorv!", greeting);
         }
+
+        [Fact]
+        public async Task Sequence_enables_sync_map_with_async_function()
+        {
+            // When starting from a sync Result, Map with an async function
+            // produces Result<TError, Task<T>>. Sequence flips it so we can await.
+            Result<string, string> username = Result<string, string>.Success("varmkorv");
+
+            var result = await username
+                .Map(FormatGreeting)
+                .Sequence();
+
+            Assert.Equal("Hello, varmkorv!", result.SuccessValue());
+        }
+
+        [Fact]
+        public async Task Sequence_skips_the_async_work_on_error()
+        {
+            Result<string, string> username = Result<string, string>.Error("not found");
+
+            var result = await username
+                .Map(FormatGreeting)
+                .Sequence();
+
+            Assert.Equal("not found", result.ErrorValue());
+        }
     }
 }
+
