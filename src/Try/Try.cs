@@ -29,15 +29,15 @@ namespace Svan.Monads
 
         public Result<Exception, TSuccess> ToResult() => this;
 
-        public Try<TOut> MapCatching<TOut>(Func<TSuccess, TOut> mapper)
+        public Try<TOut> MapCatching<TOut>(Delegates.Map<TOut> mapper)
             => Fold(
                  error => error,
                  success => Try.Catching(() => mapper(success)));
 
-        public Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
+        public new Try<TOut> Bind<TOut>(Delegates.Bind<TOut> binder)
             => base.Bind<TOut>(binder) as Try<TOut>;
 
-        public new Try<TOut> Map<TOut>(Func<TSuccess, TOut> mapper)
+        public new Try<TOut> Map<TOut>(Delegates.Map<TOut> mapper)
             => base.Map<TOut>(mapper) as Try<TOut>;
 
 
@@ -46,7 +46,7 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
-        public new Try<TSuccess> Do(Action<TSuccess> @do)
+        public new Try<TSuccess> Do(Delegates.DoWithSuccess @do)
             => base.Do(@do) as Try<TSuccess>;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TError"/></param>
         /// <returns>The current state of the Result</returns>
-        public new Try<TSuccess> DoIfError(Action<Exception> @do)
+        public new Try<TSuccess> DoIfError(Delegates.DoWithError @do)
             => base.DoIfError(@do) as Try<TSuccess>;
 
 
@@ -63,7 +63,7 @@ namespace Svan.Monads
         /// </summary>
         public Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Try<TSuccessOther> other,
-            Func<TSuccess, TSuccessOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessOther, TSuccessOut> combine)
                 => base.Zip(other, combine) as Try<TSuccessOut>;
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Svan.Monads
         public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
-            Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
                 => base.Zip(firstOther, secondOther, combine) as Try<TSuccessOut>;
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Svan.Monads
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
             Try<TSuccessThirdOther> thirdOther,
-            Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
                 => base.Zip(firstOther, secondOther, thirdOther, combine) as Try<TSuccessOut>;
 
         /// <summary>
@@ -98,13 +98,7 @@ namespace Svan.Monads
             Try<TSuccessSecondOther> secondOther,
             Try<TSuccessThirdOther> thirdOther,
             Try<TSuccessFourthOther> fourthOther,
-            Func<
-                TSuccess,
-                TSuccessFirstOther,
-                TSuccessSecondOther,
-                TSuccessThirdOther,
-                TSuccessFourthOther,
-                TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessFourthOther, TSuccessOut> combine)
                     => base.Zip(firstOther, secondOther, thirdOther, fourthOther, combine) as Try<TSuccessOut>;
     }
 }

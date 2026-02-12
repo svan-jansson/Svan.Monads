@@ -21,12 +21,52 @@ namespace Svan.Monads
         public TError ErrorValue() => IsError() ? this.AsT0.Value : throw new NullReferenceException();
         public TSuccess SuccessValue() => IsSuccess() ? this.AsT1.Value : throw new NullReferenceException();
 
-        public Result<TError, TOut> Bind<TOut>(Func<TSuccess, Result<TError, TOut>> binder)
+        public static class Delegates
+        {
+            public delegate Result<TError, TOut> Bind<TOut>(TSuccess value);
+            public delegate Result<TOut, TSuccess> BindError<TOut>(TError value);
+            public delegate Result<TOut, TSuccess> Recover<TOut>(TError value);
+            public delegate TOut Map<out TOut>(TSuccess value);
+            public delegate TOut MapError<out TOut>(TError value);
+            public delegate void DoWithSuccess(TSuccess value);
+            public delegate void DoWithError(TError value);
+            public delegate TOut FoldError<out TOut>(TError value);
+            public delegate TOut FoldSuccess<out TOut>(TSuccess value);
+            public delegate TSuccess Default(TError error);
+
+            public delegate TOut Combine<in TFirstOther, out TOut>(
+                TSuccess input,
+                TFirstOther firstOther
+            );
+
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, out TOut>(
+                TSuccess input,
+                TFirstOther firstOther,
+                TSecondOther secondOther
+            );
+
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, in TThirdOther, out TOut>(
+                TSuccess input,
+                TFirstOther firstOther,
+                TSecondOther secondOther,
+                TThirdOther thirdOther
+            );
+
+            public delegate TOut Combine<in TFirstOther, in TSecondOther, in TThirdOther, in TFourthOther, out TOut>(
+                TSuccess input,
+                TFirstOther firstOther,
+                TSecondOther secondOther,
+                TThirdOther thirdOther,
+                TFourthOther fourthOther
+            );
+        }
+
+        public Result<TError, TOut> Bind<TOut>(Delegates.Bind<TOut> binder)
             => Match(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => binder(success.Value));
 
-        public Result<TOut, TSuccess> BindError<TOut>(Func<TError, Result<TOut, TSuccess>> binder)
+        public Result<TOut, TSuccess> BindError<TOut>(Delegates.BindError<TOut> binder)
             => Match(
                 error => binder(error.Value),
                 success => Result<TOut, TSuccess>.Success(success.Value));
@@ -34,17 +74,17 @@ namespace Svan.Monads
         /// <summary>
         /// Recover from <c>TError</c> by providing a <c>TSuccess</c> or a new error <c>TOut</c>.
         /// </summary>
-        public Result<TOut, TSuccess> Recover<TOut>(Func<TError, Result<TOut, TSuccess>> recover)
+        public Result<TOut, TSuccess> Recover<TOut>(Delegates.Recover<TOut> recover)
             => Match(
                 error => recover(error.Value),
                 success => success.Value);
         
-        public Result<TError, TOut> Map<TOut>(Func<TSuccess, TOut> mapSuccess)
+        public Result<TError, TOut> Map<TOut>(Delegates.Map<TOut> mapSuccess)
             => Match(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => Result<TError, TOut>.Success(mapSuccess(success.Value)));
 
-        public Result<TOut, TSuccess> MapError<TOut>(Func<TError, TOut> mapError)
+        public Result<TOut, TSuccess> MapError<TOut>(Delegates.MapError<TOut> mapError)
             => Match(
                 error => Result<TOut, TSuccess>.Error(mapError(error.Value)),
                 success => Result<TOut, TSuccess>.Success(success.Value));
@@ -54,7 +94,7 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
-        public Result<TError, TSuccess> Do(Action<TSuccess> @do)
+        public Result<TError, TSuccess> Do(Delegates.DoWithSuccess @do)
         {
             if (IsSuccess())
             {
@@ -69,7 +109,7 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TError"/></param>
         /// <returns>The current state of the Result</returns>
-        public Result<TError, TSuccess> DoIfError(Action<TError> @do)
+        public Result<TError, TSuccess> DoIfError(Delegates.DoWithError @do)
         {
             if (IsError())
             {
@@ -82,7 +122,7 @@ namespace Svan.Monads
         /// <summary>
         /// Get the value of <c>TSuccess</c> or a default value from the supplied function.
         /// </summary>
-        public TSuccess DefaultWith(Func<TError, TSuccess> fallback)
+        public TSuccess DefaultWith(Delegates.Default fallback)
             => Match(
                 error => fallback(error.Value),
                 success => success.Value);
@@ -98,7 +138,7 @@ namespace Svan.Monads
         /// <summary>
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>TError</c> and case <c>TSuccess</c>.
         /// </summary>
-        public TOut Fold<TOut>(Func<TError, TOut> caseError, Func<TSuccess, TOut> caseSuccess)
+        public TOut Fold<TOut>(Delegates.FoldError<TOut> caseError, Delegates.FoldSuccess<TOut> caseSuccess)
             => Match(
                 error => caseError(error.Value),
                 success => caseSuccess(success.Value));
@@ -108,7 +148,7 @@ namespace Svan.Monads
         /// </summary>
         public Result<TError, TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Result<TError, TSuccessOther> other,
-            Func<TSuccess, TSuccessOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessOther, TSuccessOut> combine)
         {
             TError error = default;
             bool allSuccess = false;
@@ -143,7 +183,7 @@ namespace Svan.Monads
         public Result<TError, TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Result<TError, TSuccessFirstOther> firstOther,
             Result<TError, TSuccessSecondOther> secondOther,
-            Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
         {
             TError error = default;
             bool allSuccess = false;
@@ -185,7 +225,7 @@ namespace Svan.Monads
             Result<TError, TSuccessFirstOther> firstOther,
             Result<TError, TSuccessSecondOther> secondOther,
             Result<TError, TSuccessThirdOther> thirdOther,
-            Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
         {
             TError error = default;
             bool allSuccess = false;
@@ -243,13 +283,7 @@ namespace Svan.Monads
             Result<TError, TSuccessSecondOther> secondOther,
             Result<TError, TSuccessThirdOther> thirdOther,
             Result<TError, TSuccessFourthOther> fourthOther,
-            Func<
-                TSuccess,
-                TSuccessFirstOther,
-                TSuccessSecondOther,
-                TSuccessThirdOther,
-                TSuccessFourthOther,
-                TSuccessOut> combine)
+            Delegates.Combine<TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessFourthOther, TSuccessOut> combine)
         {
             TError error = default;
             bool allSuccess = false;
