@@ -193,3 +193,59 @@ public void Try_can_wrap_caught_exceptions()
         .Do((actual) => Assert.Equal("a string", actual));
 }
 ```
+
+## Async Support
+
+Support of async workflows is added a small set of extension methods. Sync operations work naturally after an `await`, and only callbacks that are themselves async need async-specific methods.
+
+### Awaiting then chaining sync operations
+
+When an async function returns an `Option<T>`, `Result<TError, T>`, or `Try<T>`, you can `await` it and then chain any sync operation as usual:
+
+```csharp
+async Task<Option<int>> FindUserId(string username) { ... }
+
+var result = (await FindUserId("malin"))
+    .Map(id => id * 2)
+    .Filter(id => id > 0)
+    .DefaultWith(() => -1);
+```
+
+### BindAsync and MapAsync
+
+When the callback itself is async, `BindAsync` and `MapAsync` enable fluent chaining without intermediate awaits:
+
+```csharp
+async Task<Option<string>> FindUserEmail(int userId) { ... }
+async Task<string> NormalizeEmail(string email) { ... }
+
+var result = await FindUserId("malin")
+    .BindAsync(id => FindUserEmail(id))
+    .MapAsync(email => NormalizeEmail(email));
+```
+
+These work the same way on `Result` and `Try`:
+
+```csharp
+async Task<Result<string, int>> ParseUserId(string input) { ... }
+async Task<Result<string, string>> LookupUsername(int userId) { ... }
+
+var greeting = (await ParseUserId("42")
+        .BindAsync(id => LookupUsername(id)))
+    .Map(name => $"Welcome, {name}!")
+    .DefaultWith(error => $"Error: {error}");
+```
+
+### Sequence
+
+When you have a sync monad and `Map` it with an async function, you get e.g. `Option<Task<T>>`. `Sequence` flips this into `Task<Option<T>>` so you can `await` it:
+
+```csharp
+Option<string> email = Option<string>.Some("  ALICE@EXAMPLE.COM  ");
+
+var result = await email
+    .Map(e => NormalizeEmail(e))
+    .Sequence();
+```
+
+This also works on `Result` and `Try`, skipping the async work when in the error/none state.
