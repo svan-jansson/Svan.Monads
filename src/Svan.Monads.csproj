@@ -5,8 +5,6 @@
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <PackageId>Svan.Monads</PackageId>
-    <Version Condition="'$(GITHUB_BUILD_NUMBER)' != ''">1.$(GITHUB_BUILD_NUMBER)</Version>
-    <Version Condition="'$(GITHUB_BUILD_NUMBER)' == ''">1.0</Version>
     <Authors>Erik Svensson</Authors>
     <Copyright>Erik Svensson</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -21,6 +19,7 @@
     <None Include="../LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.*" PrivateAssets="all" />
     <PackageReference Include="OneOf" Version="3.0.271" />
   </ItemGroup>
 
