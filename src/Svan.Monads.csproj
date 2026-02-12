@@ -5,11 +5,11 @@
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <PackageId>Svan.Monads</PackageId>
-    <Authors>Erik Svensson</Authors>
-    <Copyright>Erik Svensson</Copyright>
+    <Authors>Erik Hahne Tensaye</Authors>
+    <Copyright>Erik Hahne Tensaye</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/svan-jansson/Svan.Monads</RepositoryUrl>
-    <Description>This library adds common monads to the fantastic OneOf union type library.</Description>
+    <Description>This library adds common monads, currently based on the OneOf union type library.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
