@@ -5,6 +5,18 @@ namespace Svan.Monads
 {
     public static class AsyncOptionExtensions
     {
+        public static async Task<Option<T>> Sequence<T>(this Option<Task<T>> optionTask)
+        {
+            if (optionTask.IsNone())
+            {
+                return Option<T>.None();
+            }
+
+            var task = optionTask.Value();
+            var result = await task;
+            return Option<T>.Some(result);
+        }
+        
         public static async Task<Option<TOut>> BindAsync<T, TOut>(
             this Task<Option<T>> optionTask,
             Func<T, Task<Option<TOut>>> binder)

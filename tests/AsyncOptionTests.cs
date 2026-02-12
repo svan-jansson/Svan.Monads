@@ -108,5 +108,31 @@ namespace Svan.Monads.UnitTest
 
             Assert.Equal("Welcome, varmkorv@example.com!", greeting);
         }
+
+        [Fact]
+        public async Task Sequence_enables_sync_map_with_async_function()
+        {
+            // When starting from a sync Option, Map with an async function
+            // produces Option<Task<T>>. Sequence flips it so we can await.
+            Option<string> email = Option<string>.Some("  VARMKORV@EXAMPLE.COM  ");
+
+            var result = await email
+                .Map(NormalizeEmail)
+                .Sequence();
+
+            Assert.Equal("varmkorv@example.com", result.Value());
+        }
+
+        [Fact]
+        public async Task Sequence_skips_the_async_work_on_none()
+        {
+            Option<string> email = Option<string>.None();
+
+            var result = await email
+                .Map(NormalizeEmail)
+                .Sequence();
+
+            Assert.True(result.IsNone());
+        }
     }
 }
