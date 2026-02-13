@@ -22,7 +22,7 @@ namespace Svan.Monads
     public struct None { };
 
     /// <summary>
-    /// Union of <c>None</c> and <c>Some<T></c> with monad features for the Maybe flow control
+    /// Union of <c>None</c> and <c>Some&lt;T&gt;</c> with monad features for the Maybe flow control
     /// </summary>
     public class Option<T> : OneOfBase<None, Some<T>>
     {
@@ -34,7 +34,14 @@ namespace Svan.Monads
         public static Option<T> None() => new None();
         public static Option<T> Some(T value) => new Some<T>(value);
 
+        /// <summary>
+        /// Returns <c>true</c> if the option is <c>None</c>.
+        /// </summary>
         public bool IsNone() => this.IsT0;
+
+        /// <summary>
+        /// Returns <c>true</c> if the option is <c>Some</c>.
+        /// </summary>
         public bool IsSome() => this.IsT1;
 
         /// <summary>
@@ -43,9 +50,9 @@ namespace Svan.Monads
         new public T Value() => IsSome() ? this.AsT1.Value : throw new NullReferenceException();
 
         /// <summary>
-        /// Bind the <c>Option<T></c> to an <c>Option<TOut></c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
+        /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
         /// </summary>
-        /// <param name="binder">A function that returns an <c>Option<TOut></c></param>
+        /// <param name="binder">A function that returns an <c>Option&lt;TOut&gt;</c></param>
         /// <returns>An option of the output type of the binder. </returns>
         public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
             => Match(
@@ -53,7 +60,7 @@ namespace Svan.Monads
                 some => binder(some.Value));
 
         /// <summary>
-        /// Map the value of the option to an <c>Option<TOut></c> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
+        /// Map the value of the option to an <c>Option&lt;TOut&gt;</c> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
         /// </summary>
         /// <param name="mapping">A function that returns a value of <c>TOut</c></param>
         /// <typeparam name="TOut"></typeparam>
@@ -74,7 +81,7 @@ namespace Svan.Monads
                 some => filter(some.Value) ? some : None());
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is Some<T>
+        /// Do let's you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
         /// </summary>
         /// <param name="do">An action that takes a single parameter of T</param>
         /// <returns>The current state of the Option</returns>
@@ -208,7 +215,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Create a <c>Result<TError, T></c> from an Option<T> by supplying a mapper for the error case
+        /// Create a <c>Result&lt;TError, T&gt;</c> from an <c>Option&lt;T&gt;</c> by supplying a mapper for the error case
         /// </summary>
 
         public Result<TError, T> ToResult<TError>(Func<TError> defaultError)

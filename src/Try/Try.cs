@@ -4,8 +4,15 @@ using OneOf;
 
 namespace Svan.Monads
 {
+    /// <summary>
+    /// Factory for creating <c>Try&lt;TSuccess&gt;</c> instances by catching exceptions.
+    /// </summary>
     public static class Try
     {
+        /// <summary>
+        /// Execute <paramref name="codeBlock"/> and return its result as <c>Success</c>.
+        /// If the code block throws, the exception is caught and returned as the error state.
+        /// </summary>
         public static Try<TSuccess> Catching<TSuccess>(Func<TSuccess> codeBlock)
         {
             try
@@ -19,6 +26,9 @@ namespace Svan.Monads
         }
     }
 
+    /// <summary>
+    /// A specialization of <c>Result&lt;Exception, TSuccess&gt;</c> that provides exception-catching operations.
+    /// </summary>
     public class Try<TSuccess> : Result<Exception, TSuccess>
     {
         public Try(OneOf<Error<Exception>, Success<TSuccess>> _) : base(_) { }
@@ -27,13 +37,23 @@ namespace Svan.Monads
         public static implicit operator Try<TSuccess>(TSuccess _) => new Success<TSuccess>(_);
         public static implicit operator Try<TSuccess>(Exception _) => new Error<Exception>(_);
 
+        /// <summary>
+        /// Upcast to <c>Result&lt;Exception, TSuccess&gt;</c>.
+        /// </summary>
         public Result<Exception, TSuccess> ToResult() => this;
 
+        /// <summary>
+        /// Map the success value using a mapping function, catching any exception thrown by the mapper.
+        /// </summary>
         public Try<TOut> MapCatching<TOut>(Func<TSuccess, TOut> mapper)
             => Fold(
                  error => error,
                  success => Try.Catching(() => mapper(success)));
 
+        /// <summary>
+        /// Bind using a binder function, catching any exception thrown by the binder.
+        /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
+        /// </summary>
         public Try<TOut> BindCatching<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
             if (IsSuccess())
@@ -50,6 +70,11 @@ namespace Svan.Monads
             return ErrorValue();
         }
 
+        /// <summary>
+        /// Bind using a binder function.
+        /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
+        /// Exceptions thrown by the binder will propagate. Use <see cref="BindCatching{TOut}"/> to catch them instead.
+        /// </summary>
         public new Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
             if (IsSuccess())
@@ -57,6 +82,11 @@ namespace Svan.Monads
             return ErrorValue();
         }
 
+        /// <summary>
+        /// Map the success value to a new type using a mapping function.
+        /// The mapper is only called when <c>Success</c>; otherwise short-circuits with the existing error.
+        /// Exceptions thrown by the mapper will propagate. Use <see cref="MapCatching{TOut}"/> to catch them instead.
+        /// </summary>
         public new Try<TOut> Map<TOut>(Func<TSuccess, TOut> mapper)
         {
             if (IsSuccess())

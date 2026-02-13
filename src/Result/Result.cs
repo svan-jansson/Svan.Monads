@@ -4,6 +4,9 @@ using OneOf;
 
 namespace Svan.Monads
 {
+    /// <summary>
+    /// Union of <c>Error&lt;TError&gt;</c> and <c>Success&lt;TSuccess&gt;</c> with monad features for railway-oriented error handling.
+    /// </summary>
     public class Result<TError, TSuccess> : OneOfBase<Error<TError>, Success<TSuccess>>
     {
         public Result(OneOf<Error<TError>, Success<TSuccess>> _) : base(_) { }
@@ -16,16 +19,39 @@ namespace Svan.Monads
         public static Result<TError, TSuccess> Error(TError value) => new Error<TError>(value);
         public static Result<TError, TSuccess> Success(TSuccess value) => new Success<TSuccess>(value);
 
+        /// <summary>
+        /// Returns <c>true</c> if the result is in the error state.
+        /// </summary>
         public bool IsError() => this.IsT0;
+
+        /// <summary>
+        /// Returns <c>true</c> if the result is in the success state.
+        /// </summary>
         public bool IsSuccess() => this.IsT1;
+
+        /// <summary>
+        /// Returns the error value. Throws <c>NullReferenceException</c> if the result is <c>Success</c>.
+        /// </summary>
         public TError ErrorValue() => IsError() ? this.AsT0.Value : throw new NullReferenceException();
+
+        /// <summary>
+        /// Returns the success value. Throws <c>NullReferenceException</c> if the result is <c>Error</c>.
+        /// </summary>
         public TSuccess SuccessValue() => IsSuccess() ? this.AsT1.Value : throw new NullReferenceException();
 
+        /// <summary>
+        /// Bind the result to a new <c>Result&lt;TError, TOut&gt;</c> using a binder function.
+        /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
+        /// </summary>
         public Result<TError, TOut> Bind<TOut>(Func<TSuccess, Result<TError, TOut>> binder)
             => Match(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => binder(success.Value));
 
+        /// <summary>
+        /// Bind the error to a new <c>Result&lt;TOut, TSuccess&gt;</c> using a binder function.
+        /// The binder is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
+        /// </summary>
         public Result<TOut, TSuccess> BindError<TOut>(Func<TError, Result<TOut, TSuccess>> binder)
             => Match(
                 error => binder(error.Value),
@@ -39,11 +65,19 @@ namespace Svan.Monads
                 error => recover(error.Value),
                 success => success.Value);
         
+        /// <summary>
+        /// Map the success value to a new type using a mapping function.
+        /// The mapper is only called when <c>Success</c>; otherwise short-circuits with the existing error.
+        /// </summary>
         public Result<TError, TOut> Map<TOut>(Func<TSuccess, TOut> mapSuccess)
             => Match(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => Result<TError, TOut>.Success(mapSuccess(success.Value)));
 
+        /// <summary>
+        /// Map the error value to a new type using a mapping function.
+        /// The mapper is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
+        /// </summary>
         public Result<TOut, TSuccess> MapError<TOut>(Func<TError, TOut> mapError)
             => Match(
                 error => Result<TOut, TSuccess>.Error(mapError(error.Value)),
@@ -301,7 +335,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Downcast to an <see cref="Option<TSuccess>"/>. When result state <see cref="TError"/> it will cast to <see cref="None"/>.
+        /// Downcast to an <c>Option&lt;TSuccess&gt;</c>. When the result is <c>Error</c> it will return <c>None</c>.
         /// </summary>
         /// <returns></returns>
         public Option<TSuccess> ToOption()
