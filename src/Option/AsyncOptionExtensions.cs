@@ -13,7 +13,7 @@ namespace Svan.Monads
             }
 
             var task = optionTask.Value();
-            var result = await task;
+            var result = await task.ConfigureAwait(false);
             return Option<T>.Some(result);
         }
         
@@ -21,16 +21,16 @@ namespace Svan.Monads
             this Task<Option<T>> optionTask,
             Func<T, Task<Option<TOut>>> binder)
         {
-            var option = await optionTask;
-            return option.IsSome() ? await binder(option.Value()) : Option<TOut>.None();
+            var option = await optionTask.ConfigureAwait(false);
+            return option.IsSome() ? await binder(option.Value()).ConfigureAwait(false) : Option<TOut>.None();
         }
 
         public static async Task<Option<TOut>> MapAsync<T, TOut>(
             this Task<Option<T>> optionTask,
             Func<T, Task<TOut>> mapper)
         {
-            var option = await optionTask;
-            return option.IsSome() ? Option<TOut>.Some(await mapper(option.Value())) : Option<TOut>.None();
+            var option = await optionTask.ConfigureAwait(false);
+            return option.IsSome() ? Option<TOut>.Some(await mapper(option.Value()).ConfigureAwait(false)) : Option<TOut>.None();
         }
     }
 }

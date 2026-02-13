@@ -10,16 +10,16 @@ namespace Svan.Monads
         {
             if (tryTask.IsError())
                 return tryTask.ErrorValue();
-            return await tryTask.SuccessValue();
+            return await tryTask.SuccessValue().ConfigureAwait(false);
         }
 
         public static async Task<Try<TOut>> BindAsync<TSuccess, TOut>(
             this Task<Try<TSuccess>> tryTask,
             Func<TSuccess, Task<Try<TOut>>> binder)
         {
-            var result = await tryTask;
+            var result = await tryTask.ConfigureAwait(false);
             if (result.IsSuccess())
-                return await binder(result.SuccessValue());
+                return await binder(result.SuccessValue()).ConfigureAwait(false);
             return result.ErrorValue();
         }
 
@@ -27,9 +27,9 @@ namespace Svan.Monads
             this Task<Try<TSuccess>> tryTask,
             Func<TSuccess, Task<TOut>> mapper)
         {
-            var result = await tryTask;
+            var result = await tryTask.ConfigureAwait(false);
             if (result.IsSuccess())
-                return await mapper(result.SuccessValue());
+                return await mapper(result.SuccessValue()).ConfigureAwait(false);
             return result.ErrorValue();
         }
     }
