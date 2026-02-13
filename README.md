@@ -196,7 +196,7 @@ public void Try_can_wrap_caught_exceptions()
 
 ## Async Support
 
-Support of async workflows is added a small set of extension methods. Sync operations work naturally after an `await`, and only callbacks that are themselves async need async-specific methods.
+Support of async workflows is added as a small set of extension methods. Sync operations work naturally after an `await`, and only callbacks that are themselves async need async-specific methods.
 
 ### Awaiting then chaining sync operations
 
