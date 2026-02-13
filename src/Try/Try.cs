@@ -91,7 +91,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
+        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Try<TSuccessOther> other,
             Func<TSuccess, TSuccessOther, TSuccessOut> combine)
         {
@@ -104,7 +104,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
+        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
@@ -118,7 +118,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
+        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
             Try<TSuccessThirdOther> thirdOther,
@@ -133,7 +133,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public Try<TSuccessOut> Zip<
+        public new Try<TSuccessOut> Zip<
             TSuccessOut,
             TSuccessFirstOther,
             TSuccessSecondOther,
