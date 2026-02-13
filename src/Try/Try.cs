@@ -50,7 +50,7 @@ namespace Svan.Monads
             return ErrorValue();
         }
 
-        public Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
+        public new Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
             if (IsSuccess())
                 return binder(SuccessValue());
