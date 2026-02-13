@@ -1,8 +1,6 @@
 using Xunit;
-using Svan.Monads;
 using OneOf.Types;
 using OneOf;
-using System;
 
 namespace Svan.Monads.UnitTests
 {

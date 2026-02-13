@@ -1,7 +1,6 @@
 using Xunit;
-using Svan.Monads;
 
-namespace Svan.Monads.UnitTest
+namespace Svan.Monads.UnitTests
 {
     public class AsyncResultTests
     {
@@ -141,6 +140,18 @@ namespace Svan.Monads.UnitTest
                 .Sequence();
 
             Assert.Equal("not found", result.ErrorValue());
+        }
+
+        [Fact]
+        public async Task Sequence_propagates_faulted_inner_task()
+        {
+            var result = Result<string, Task<string>>.Success(
+                Task.FromException<string>(new InvalidOperationException("faulted")));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => result.Sequence());
+
+            Assert.Equal("faulted", ex.Message);
         }
     }
 }

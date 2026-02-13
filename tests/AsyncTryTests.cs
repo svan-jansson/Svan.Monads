@@ -1,7 +1,6 @@
 using Xunit;
-using Svan.Monads;
 
-namespace Svan.Monads.UnitTest
+namespace Svan.Monads.UnitTests
 {
     public class AsyncTryTests
     {
@@ -128,7 +127,17 @@ namespace Svan.Monads.UnitTest
             Assert.Equal("boom", result.ErrorValue().Message);
         }
 
-        // ── Catching variants: exceptions stay inside the monad ──
+        [Fact]
+        public async Task Sequence_catches_faulted_inner_task()
+        {
+            Try<Task<string>> value = Try.Catching<Task<string>>(
+                () => Task.FromException<string>(new InvalidOperationException("faulted")));
+
+            var result = await value.Sequence();
+
+            Assert.True(result.IsError());
+            Assert.Equal("faulted", result.ErrorValue().Message);
+        }
 
         [Fact]
         public void BindCatching_catches_exception_from_binder()

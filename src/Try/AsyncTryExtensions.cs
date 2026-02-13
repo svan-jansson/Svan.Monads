@@ -8,13 +8,21 @@ namespace Svan.Monads
         /// <summary>
         /// Flips a <c>Try&lt;Task&lt;TSuccess&gt;&gt;</c> into a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>.
         /// Awaits the inner task when <c>Success</c>, returns the error immediately when <c>Error</c>.
+        /// If the inner task faults, the exception is caught and returned as the error state.
         /// </summary>
         public static async Task<Try<TSuccess>> Sequence<TSuccess>(
             this Try<Task<TSuccess>> tryTask)
         {
             if (tryTask.IsError())
                 return tryTask.ErrorValue();
-            return await tryTask.SuccessValue().ConfigureAwait(false);
+            try
+            {
+                return await tryTask.SuccessValue().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <summary>

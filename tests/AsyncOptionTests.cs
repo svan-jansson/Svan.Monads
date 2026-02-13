@@ -1,7 +1,6 @@
 using Xunit;
-using Svan.Monads;
 
-namespace Svan.Monads.UnitTest
+namespace Svan.Monads.UnitTests
 {
     public class AsyncOptionTests
     {
@@ -133,6 +132,18 @@ namespace Svan.Monads.UnitTest
                 .Sequence();
 
             Assert.True(result.IsNone());
+        }
+
+        [Fact]
+        public async Task Sequence_propagates_faulted_inner_task()
+        {
+            var option = Option<Task<string>>.Some(
+                Task.FromException<string>(new InvalidOperationException("faulted")));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => option.Sequence());
+
+            Assert.Equal("faulted", ex.Message);
         }
     }
 }
