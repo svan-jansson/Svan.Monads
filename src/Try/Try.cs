@@ -34,6 +34,22 @@ namespace Svan.Monads
                  error => error,
                  success => Try.Catching(() => mapper(success)));
 
+        public Try<TOut> BindCatching<TOut>(Func<TSuccess, Try<TOut>> binder)
+        {
+            if (IsSuccess())
+            {
+                try
+                {
+                    return binder(SuccessValue());
+                }
+                catch (Exception ex)
+                {
+                    return ex;
+                }
+            }
+            return ErrorValue();
+        }
+
         public Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
             if (IsSuccess())

@@ -24,8 +24,6 @@ namespace Svan.Monads.UnitTest
             return $"result: {value}";
         }
 
-        // ── Already works today: await then chain sync operations ──
-
         [Fact]
         public async Task Await_then_map_and_fold()
         {
@@ -55,8 +53,6 @@ namespace Svan.Monads.UnitTest
 
             Assert.Equal(-1, result);
         }
-
-        // ── With two async extension methods: BindAsync and MapAsync ──
 
         [Fact]
         public async Task Async_bind_enables_fluent_chaining()
@@ -130,6 +126,92 @@ namespace Svan.Monads.UnitTest
                 .Sequence();
 
             Assert.Equal("boom", result.ErrorValue().Message);
+        }
+
+        // ── Catching variants: exceptions stay inside the monad ──
+
+        [Fact]
+        public void BindCatching_catches_exception_from_binder()
+        {
+            Try<int> value = Try.Catching(() => 10);
+
+            var result = value
+                .BindCatching<string>(n => throw new InvalidOperationException("binder failed"));
+
+            Assert.Equal("binder failed", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public async Task BindCatchingAsync_catches_exception_from_async_binder()
+        {
+            var result = await ParseNumber("10")
+                .BindCatchingAsync<int, string>(async n =>
+                {
+                    await Task.Yield();
+                    throw new InvalidOperationException("async binder failed");
+                });
+
+            Assert.Equal("async binder failed", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public async Task BindCatchingAsync_catches_faulted_task()
+        {
+            var result = await ParseNumber("10")
+                .BindCatchingAsync<int, string>(n =>
+                    Task.FromException<Try<string>>(new InvalidOperationException("faulted")));
+
+            Assert.Equal("faulted", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public async Task BindCatchingAsync_short_circuits_on_error()
+        {
+            var result = await ParseNumber("abc")
+                .BindCatchingAsync(SafeDivide);
+
+            Assert.True(result.IsError());
+        }
+
+        [Fact]
+        public async Task MapCatchingAsync_catches_exception_from_async_mapper()
+        {
+            var result = await ParseNumber("10")
+                .MapCatchingAsync<int, string>(async n =>
+                {
+                    await Task.Yield();
+                    throw new InvalidOperationException("async mapper failed");
+                });
+
+            Assert.Equal("async mapper failed", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public async Task MapCatchingAsync_catches_faulted_task()
+        {
+            var result = await ParseNumber("10")
+                .MapCatchingAsync<int, string>(n =>
+                    Task.FromException<string>(new InvalidOperationException("faulted")));
+
+            Assert.Equal("faulted", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public async Task MapCatchingAsync_returns_value_on_success()
+        {
+            var result = await ParseNumber("10")
+                .MapCatchingAsync(FormatResult);
+
+            Assert.Equal("result: 10", result.SuccessValue());
+        }
+
+        [Fact]
+        public async Task MapCatchingAsync_short_circuits_on_error()
+        {
+            var result = await ParseNumber("abc")
+                .MapCatchingAsync(FormatResult);
+
+            Assert.True(result.IsError());
         }
     }
 }
