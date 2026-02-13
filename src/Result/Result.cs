@@ -144,31 +144,12 @@ namespace Svan.Monads
             Result<TError, TSuccessOther> other,
             Func<TSuccess, TSuccessOther, TSuccessOut> combine)
         {
-            TError error = default;
-            bool allSuccess = false;
+            if (this.IsError())
+                return Result<TError, TSuccessOut>.Error(this.ErrorValue());
+            if (other.IsError())
+                return Result<TError, TSuccessOut>.Error(other.ErrorValue());
 
-            if (this.IsSuccess())
-            {
-                allSuccess = true;
-            }
-            else
-            {
-                error = this.ErrorValue();
-            }
-
-            if (allSuccess && !other.IsSuccess())
-            {
-                error = other.ErrorValue();
-                allSuccess = false;
-            }
-
-
-            if (allSuccess)
-            {
-                return combine(this.SuccessValue(), other.SuccessValue());
-            }
-
-            return Result<TError, TSuccessOut>.Error(error);
+            return combine(this.SuccessValue(), other.SuccessValue());
         }
 
         /// <summary>
@@ -179,37 +160,14 @@ namespace Svan.Monads
             Result<TError, TSuccessSecondOther> secondOther,
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
         {
-            TError error = default;
-            bool allSuccess = false;
+            if (this.IsError())
+                return Result<TError, TSuccessOut>.Error(this.ErrorValue());
+            if (firstOther.IsError())
+                return Result<TError, TSuccessOut>.Error(firstOther.ErrorValue());
+            if (secondOther.IsError())
+                return Result<TError, TSuccessOut>.Error(secondOther.ErrorValue());
 
-            if (this.IsSuccess())
-            {
-                allSuccess = true;
-            }
-            else
-            {
-                error = this.ErrorValue();
-            }
-
-            if (allSuccess && !firstOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = firstOther.ErrorValue();
-            }
-
-            if (allSuccess && !secondOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = secondOther.ErrorValue();
-            }
-
-
-            if (allSuccess)
-            {
-                return combine(this.SuccessValue(), firstOther.SuccessValue(), secondOther.SuccessValue());
-            }
-
-            return Result<TError, TSuccessOut>.Error(error);
+            return combine(this.SuccessValue(), firstOther.SuccessValue(), secondOther.SuccessValue());
         }
 
         /// <summary>
@@ -221,47 +179,20 @@ namespace Svan.Monads
             Result<TError, TSuccessThirdOther> thirdOther,
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
         {
-            TError error = default;
-            bool allSuccess = false;
+            if (this.IsError())
+                return Result<TError, TSuccessOut>.Error(this.ErrorValue());
+            if (firstOther.IsError())
+                return Result<TError, TSuccessOut>.Error(firstOther.ErrorValue());
+            if (secondOther.IsError())
+                return Result<TError, TSuccessOut>.Error(secondOther.ErrorValue());
+            if (thirdOther.IsError())
+                return Result<TError, TSuccessOut>.Error(thirdOther.ErrorValue());
 
-            if (this.IsSuccess())
-            {
-                allSuccess = true;
-            }
-            else
-            {
-                error = this.ErrorValue();
-            }
-
-            if (allSuccess && !firstOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = firstOther.ErrorValue();
-            }
-
-            if (allSuccess && !secondOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = secondOther.ErrorValue();
-            }
-
-            if (allSuccess && !thirdOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = thirdOther.ErrorValue();
-            }
-
-
-            if (allSuccess)
-            {
-                return combine(
-                    this.SuccessValue(),
-                    firstOther.SuccessValue(),
-                    secondOther.SuccessValue(),
-                    thirdOther.SuccessValue());
-            }
-
-            return Result<TError, TSuccessOut>.Error(error);
+            return combine(
+                this.SuccessValue(),
+                firstOther.SuccessValue(),
+                secondOther.SuccessValue(),
+                thirdOther.SuccessValue());
         }
 
         /// <summary>
@@ -285,53 +216,23 @@ namespace Svan.Monads
                 TSuccessFourthOther,
                 TSuccessOut> combine)
         {
-            TError error = default;
-            bool allSuccess = false;
+            if (this.IsError())
+                return Result<TError, TSuccessOut>.Error(this.ErrorValue());
+            if (firstOther.IsError())
+                return Result<TError, TSuccessOut>.Error(firstOther.ErrorValue());
+            if (secondOther.IsError())
+                return Result<TError, TSuccessOut>.Error(secondOther.ErrorValue());
+            if (thirdOther.IsError())
+                return Result<TError, TSuccessOut>.Error(thirdOther.ErrorValue());
+            if (fourthOther.IsError())
+                return Result<TError, TSuccessOut>.Error(fourthOther.ErrorValue());
 
-            if (this.IsSuccess())
-            {
-                allSuccess = true;
-            }
-            else
-            {
-                error = this.ErrorValue();
-            }
-
-            if (allSuccess && !firstOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = firstOther.ErrorValue();
-            }
-
-            if (allSuccess && !secondOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = secondOther.ErrorValue();
-            }
-
-            if (allSuccess && !thirdOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = thirdOther.ErrorValue();
-            }
-
-            if (allSuccess && !fourthOther.IsSuccess())
-            {
-                allSuccess = false;
-                error = fourthOther.ErrorValue();
-            }
-
-            if (allSuccess)
-            {
-                return combine(
-                    this.SuccessValue(),
-                    firstOther.SuccessValue(),
-                    secondOther.SuccessValue(),
-                    thirdOther.SuccessValue(),
-                    fourthOther.SuccessValue());
-            }
-
-            return Result<TError, TSuccessOut>.Error(error);
+            return combine(
+                this.SuccessValue(),
+                firstOther.SuccessValue(),
+                secondOther.SuccessValue(),
+                thirdOther.SuccessValue(),
+                fourthOther.SuccessValue());
         }
 
         /// <summary>
