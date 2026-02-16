@@ -1,6 +1,4 @@
 ﻿using System;
-using OneOf.Types;
-using OneOf;
 
 namespace Svan.Monads
 {
@@ -31,7 +29,8 @@ namespace Svan.Monads
     /// </summary>
     public class Try<TSuccess> : Result<Exception, TSuccess>
     {
-        public Try(OneOf<Error<Exception>, Success<TSuccess>> _) : base(_) { }
+        public Try(Error<Exception> value) : base(value) { }
+        public Try(Success<TSuccess> value) : base(value) { }
         public static implicit operator Try<TSuccess>(Error<Exception> _) => new Try<TSuccess>(_);
         public static implicit operator Try<TSuccess>(Success<TSuccess> _) => new Try<TSuccess>(_);
         public static implicit operator Try<TSuccess>(TSuccess _) => new Success<TSuccess>(_);

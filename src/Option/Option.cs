@@ -1,34 +1,16 @@
 ﻿using System;
-using System.Linq;
-using OneOf;
 
 namespace Svan.Monads
 {
     /// <summary>
-    /// Represents some value of type T
-    /// </summary>
-    public struct Some<T>
-    {
-        public T Value { get; }
-        public Some(T value)
-        {
-            Value = value;
-        }
-    }
-
-    /// <summary>
-    /// Represents no value
-    /// </summary>
-    public struct None { };
-
-    /// <summary>
     /// Union of <c>None</c> and <c>Some&lt;T&gt;</c> with monad features for the Maybe flow control
     /// </summary>
-    public class Option<T> : OneOfBase<None, Some<T>>
+    public class Option<T> : Union<None, Some<T>>
     {
-        public Option(OneOf<None, Some<T>> _) : base(_) { }
-        public static implicit operator Option<T>(None _) => new Option<T>(_);
-        public static implicit operator Option<T>(Some<T> _) => new Option<T>(_);
+        public Option(None value) : base(value) { }
+        public Option(Some<T> value) : base(value) { }
+        public static implicit operator Option<T>(None _) => new (_);
+        public static implicit operator Option<T>(Some<T> _) => new (_);
         public static implicit operator Option<T>(T _) => Some(_);
 
         public static Option<T> None() => new None();
@@ -37,17 +19,17 @@ namespace Svan.Monads
         /// <summary>
         /// Returns <c>true</c> if the option is <c>None</c>.
         /// </summary>
-        public bool IsNone() => this.IsT0;
+        public bool IsNone() => this.IsLeft;
 
         /// <summary>
         /// Returns <c>true</c> if the option is <c>Some</c>.
         /// </summary>
-        public bool IsSome() => this.IsT1;
+        public bool IsSome() => this.IsRight;
 
         /// <summary>
         /// Returns the current value. Will throw <c>NullReferenceException</c> if current option state is None.
         /// </summary>
-        new public T Value() => IsSome() ? this.AsT1.Value : throw new NullReferenceException();
+        new public T Value() => IsSome() ? this.AsRight.Value : throw new NullReferenceException();
 
         /// <summary>
         /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
@@ -55,7 +37,7 @@ namespace Svan.Monads
         /// <param name="binder">A function that returns an <c>Option&lt;TOut&gt;</c></param>
         /// <returns>An option of the output type of the binder. </returns>
         public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
-            => Match(
+            => Fold(
                 none => none,
                 some => binder(some.Value));
 
@@ -66,7 +48,7 @@ namespace Svan.Monads
         /// <typeparam name="TOut"></typeparam>
         /// <returns>An option of the output type of the mapping</returns>
         public Option<TOut> Map<TOut>(Func<T, TOut> mapping)
-            => Match(
+            => Fold(
                 none => Option<TOut>.None(),
                 some => Option<TOut>.Some(mapping(some.Value)));
 
@@ -76,7 +58,7 @@ namespace Svan.Monads
         /// <param name="filter"></param>
         /// <returns><c>Some</c> when filter returns true. <c>None</c> when filter returns false or current state of option is <c>None</c></returns>
         public Option<T> Filter(Func<T, bool> filter)
-            => Match(
+            => Fold(
                 none => none,
                 some => filter(some.Value) ? some : None());
 
@@ -114,7 +96,7 @@ namespace Svan.Monads
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>None</c> and case <c>Some</c>.
         /// </summary>
         public TOut Fold<TOut>(Func<TOut> caseNone, Func<T, TOut> caseSome)
-            => Match(
+            => base.Fold(
                 none => caseNone(),
                 some => caseSome(some.Value));
 
@@ -122,7 +104,7 @@ namespace Svan.Monads
         /// Get the value of <c>Some</c> or a default value from the supplied function.
         /// </summary>
         public T DefaultWith(Func<T> defaultNone)
-            => Match(
+            => Fold(
                 none => defaultNone(),
                 some => some.Value);
         
@@ -130,7 +112,7 @@ namespace Svan.Monads
         /// Get the value of <c>Some</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
         public T OrThrow()
-            => Match(
+            => Fold(
                 none => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
                 some => some.Value);
         

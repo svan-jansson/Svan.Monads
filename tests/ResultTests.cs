@@ -1,6 +1,4 @@
 using Xunit;
-using OneOf.Types;
-using OneOf;
 
 namespace Svan.Monads.UnitTests
 {
@@ -29,7 +27,7 @@ namespace Svan.Monads.UnitTests
                 => Divide(12, divideBy)
                     .Bind(result => Divide(result, 2))
                     .Map(result => result * 2)
-                    .Switch(
+                    .Iter(
                         error => throw new DivideByZeroException(error.Value),
                         success => Assert.Equal(expectedSuccess, success.Value));
 
@@ -96,12 +94,12 @@ namespace Svan.Monads.UnitTests
         public void Result_can_be_downcasted_to_option()
         {
             Result<Exception, int> result = new Exception("this is an error");
-            result.ToOption().Switch(
+            result.ToOption().Iter(
                 none => Assert.True(true, "Error should map to None"),
                 some => Assert.Fail("this should not be executed"));
 
             result = 5;
-            result.ToOption().Switch(
+            result.ToOption().Iter(
                 none => Assert.Fail("this should not be executed"),
                 some => Assert.Equal(5, some.Value));
         }
@@ -232,7 +230,7 @@ namespace Svan.Monads.UnitTests
             var actual = ValidateEmail(input)
                 .Bind(ValidatePhoneNumber)
                 .Map(customer => $"valid customer: ${customer.Email} - ${customer.PhoneNumber}")
-                .MapError(error => error.Match(
+                .MapError(error => error.Fold(
                     invalidEmail => "invalid email",
                     invalidPhoneNumber => "invalid phone number"
                 ));
@@ -273,11 +271,10 @@ namespace Svan.Monads.UnitTests
         class InvalidEmail { }
         class InvalidPhoneNumber { }
 
-        class CustomerError : OneOfBase<InvalidEmail, InvalidPhoneNumber>
+        class CustomerError : Union<InvalidEmail, InvalidPhoneNumber>
         {
-            public CustomerError(OneOf<InvalidEmail, InvalidPhoneNumber> input) : base(input)
-            {
-            }
+            public CustomerError(InvalidEmail input) : base(input) { }
+            public CustomerError(InvalidPhoneNumber input) : base(input) { }
         }
 
     }

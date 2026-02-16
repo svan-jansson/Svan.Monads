@@ -1,8 +1,8 @@
 [![Build, Test & Publish](https://github.com/svan-jansson/Svan.Monads/actions/workflows/build-test-publish.yml/badge.svg)](https://github.com/svan-jansson/Svan.Monads/actions/workflows/build-test-publish.yml) [![Nuget](https://img.shields.io/nuget/v/Svan.Monads)](https://www.nuget.org/packages/Svan.Monads/)
 
-# Monads Based on the OneOf Union Type
+# Common Monads
 
-This library adds common monads, currently based on the [OneOf](https://github.com/mcintyre321/OneOf) union type library.
+This library adds some common monads to C#, enabling "Railway Oriented Programming" and functional programming styles. It includes the `Option<T>`, `Result<TError, TSuccess>`, and `Try<TSuccess>` monads, along with extension methods for fluent chaining, async, and error handling.
 
 ## Installation
 

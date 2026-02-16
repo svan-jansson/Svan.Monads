@@ -1,15 +1,14 @@
 ﻿using System;
-using OneOf.Types;
-using OneOf;
 
 namespace Svan.Monads
 {
     /// <summary>
     /// Union of <c>Error&lt;TError&gt;</c> and <c>Success&lt;TSuccess&gt;</c> with monad features for railway-oriented error handling.
     /// </summary>
-    public class Result<TError, TSuccess> : OneOfBase<Error<TError>, Success<TSuccess>>
+    public class Result<TError, TSuccess> : Union<Error<TError>, Success<TSuccess>>
     {
-        public Result(OneOf<Error<TError>, Success<TSuccess>> _) : base(_) { }
+        public Result(Error<TError> value) : base(value) { }
+        public Result(Success<TSuccess> value) : base(value) { }
         public static implicit operator Result<TError, TSuccess>(Error<TError> _) => new Result<TError, TSuccess>(_);
         public static implicit operator Result<TError, TSuccess>(Success<TSuccess> _) => new Result<TError, TSuccess>(_);
 
@@ -22,29 +21,29 @@ namespace Svan.Monads
         /// <summary>
         /// Returns <c>true</c> if the result is in the error state.
         /// </summary>
-        public bool IsError() => this.IsT0;
+        public bool IsError() => this.IsLeft;
 
         /// <summary>
         /// Returns <c>true</c> if the result is in the success state.
         /// </summary>
-        public bool IsSuccess() => this.IsT1;
+        public bool IsSuccess() => this.IsRight;
 
         /// <summary>
         /// Returns the error value. Throws <c>NullReferenceException</c> if the result is <c>Success</c>.
         /// </summary>
-        public TError ErrorValue() => IsError() ? this.AsT0.Value : throw new NullReferenceException();
+        public TError ErrorValue() => IsError() ? this.AsLeft.Value : throw new NullReferenceException();
 
         /// <summary>
         /// Returns the success value. Throws <c>NullReferenceException</c> if the result is <c>Error</c>.
         /// </summary>
-        public TSuccess SuccessValue() => IsSuccess() ? this.AsT1.Value : throw new NullReferenceException();
+        public TSuccess SuccessValue() => IsSuccess() ? this.AsRight.Value : throw new NullReferenceException();
 
         /// <summary>
         /// Bind the result to a new <c>Result&lt;TError, TOut&gt;</c> using a binder function.
         /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// </summary>
         public Result<TError, TOut> Bind<TOut>(Func<TSuccess, Result<TError, TOut>> binder)
-            => Match(
+            => Fold(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => binder(success.Value));
 
@@ -53,7 +52,7 @@ namespace Svan.Monads
         /// The binder is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
         /// </summary>
         public Result<TOut, TSuccess> BindError<TOut>(Func<TError, Result<TOut, TSuccess>> binder)
-            => Match(
+            => Fold(
                 error => binder(error.Value),
                 success => Result<TOut, TSuccess>.Success(success.Value));
         
@@ -61,7 +60,7 @@ namespace Svan.Monads
         /// Recover from <c>TError</c> by providing a <c>TSuccess</c> or a new error <c>TOut</c>.
         /// </summary>
         public Result<TOut, TSuccess> Recover<TOut>(Func<TError, Result<TOut, TSuccess>> recover)
-            => Match(
+            => Fold(
                 error => recover(error.Value),
                 success => success.Value);
         
@@ -70,7 +69,7 @@ namespace Svan.Monads
         /// The mapper is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// </summary>
         public Result<TError, TOut> Map<TOut>(Func<TSuccess, TOut> mapSuccess)
-            => Match(
+            => Fold(
                 error => Result<TError, TOut>.Error(error.Value),
                 success => Result<TError, TOut>.Success(mapSuccess(success.Value)));
 
@@ -79,7 +78,7 @@ namespace Svan.Monads
         /// The mapper is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
         /// </summary>
         public Result<TOut, TSuccess> MapError<TOut>(Func<TError, TOut> mapError)
-            => Match(
+            => Fold(
                 error => Result<TOut, TSuccess>.Error(mapError(error.Value)),
                 success => Result<TOut, TSuccess>.Success(success.Value));
 
@@ -117,7 +116,7 @@ namespace Svan.Monads
         /// Get the value of <c>TSuccess</c> or a default value from the supplied function.
         /// </summary>
         public TSuccess DefaultWith(Func<TError, TSuccess> fallback)
-            => Match(
+            => Fold(
                 error => fallback(error.Value),
                 success => success.Value);
         
@@ -125,7 +124,7 @@ namespace Svan.Monads
         /// Get the value of <c>TSuccess</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
         public TSuccess OrThrow()
-            => Match(
+            => Fold(
                 error => throw new InvalidOperationException($"Expected a successful value of {typeof(TSuccess).Name} but was {error}."),
                 success => success.Value);
         
@@ -133,7 +132,7 @@ namespace Svan.Monads
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>TError</c> and case <c>TSuccess</c>.
         /// </summary>
         public TOut Fold<TOut>(Func<TError, TOut> caseError, Func<TSuccess, TOut> caseSuccess)
-            => Match(
+            => Fold(
                 error => caseError(error.Value),
                 success => caseSuccess(success.Value));
 
@@ -240,7 +239,7 @@ namespace Svan.Monads
         /// </summary>
         /// <returns></returns>
         public Option<TSuccess> ToOption()
-            => Match(
+            => Fold(
                 error => Option<TSuccess>.None(),
                 success => Option<TSuccess>.Some(success.Value));
     }

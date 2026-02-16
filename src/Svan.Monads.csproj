@@ -11,7 +11,7 @@
     <Copyright>Erik Hahne Tensaye</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/svan-jansson/Svan.Monads</RepositoryUrl>
-    <Description>This library adds common monads, currently based on the OneOf union type library.</Description>
+    <Description>This library adds common monads like Option, Result and Try with a built-in discriminated union type.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReleaseNotes Condition="Exists('$(MSBuildProjectDirectory)\..\release-notes.txt')">$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\release-notes.txt"))</PackageReleaseNotes>
@@ -23,7 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.*" PrivateAssets="all" />
-    <PackageReference Include="OneOf" Version="3.0.271" />
   </ItemGroup>
 
 </Project>
