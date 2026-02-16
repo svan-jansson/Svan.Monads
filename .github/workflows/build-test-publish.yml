@@ -52,7 +52,7 @@ jobs:
           RELEASE_NOTES: ${{ steps.release-notes.outputs.notes }}
         run: |
           printf '%s' "$RELEASE_NOTES" > release-notes.txt
-          dotnet pack -c Release -o . '-p:PackageReleaseNotes=$([System.IO.File]::ReadAllText("release-notes.txt"))'
+          dotnet pack -c Release -o .
       - name: Publish
         if: github.ref_name == github.event.repository.default_branch
         run: dotnet nuget push Svan.Monads.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json

@@ -14,6 +14,7 @@
     <Description>This library adds common monads, currently based on the OneOf union type library.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes Condition="Exists('$(MSBuildProjectDirectory)\..\release-notes.txt')">$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\release-notes.txt"))</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
