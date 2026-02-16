@@ -19,17 +19,17 @@ namespace Svan.Monads
         /// <summary>
         /// Returns <c>true</c> if the option is <c>None</c>.
         /// </summary>
-        public bool IsNone() => this.IsLeft;
+        public bool IsNone() => IsLeft;
 
         /// <summary>
         /// Returns <c>true</c> if the option is <c>Some</c>.
         /// </summary>
-        public bool IsSome() => this.IsRight;
+        public bool IsSome() => IsRight;
 
         /// <summary>
         /// Returns the current value. Will throw <c>NullReferenceException</c> if current option state is None.
         /// </summary>
-        new public T Value() => IsSome() ? this.AsRight.Value : throw new NullReferenceException();
+        public T Value() => IsSome() ? AsRight.Value : throw new NullReferenceException();
 
         /// <summary>
         /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
@@ -49,7 +49,7 @@ namespace Svan.Monads
         /// <returns>An option of the output type of the mapping</returns>
         public Option<TOut> Map<TOut>(Func<T, TOut> mapping)
             => Match(
-                none => Option<TOut>.None(),
+                _ => Option<TOut>.None(),
                 some => Option<TOut>.Some(mapping(some.Value)));
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Svan.Monads
                 some => filter(some.Value) ? some : None());
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
+        /// Do lets you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
         /// </summary>
         /// <param name="do">An action that takes a single parameter of T</param>
         /// <returns>The current state of the Option</returns>
@@ -71,14 +71,14 @@ namespace Svan.Monads
         {
             if (IsSome())
             {
-                @do(this.Value());
+                @do(Value());
             }
 
             return this;
         }
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is None
+        /// Do lets you fire and forget an action that is executed only when the value is None
         /// </summary>
         /// <param name="do">An action that takes no parameters</param>
         /// <returns>The current state of the Option</returns>
@@ -97,7 +97,7 @@ namespace Svan.Monads
         /// </summary>
         public TOut Fold<TOut>(Func<TOut> caseNone, Func<T, TOut> caseSome)
             => Match(
-                none => caseNone(),
+                _ => caseNone(),
                 some => caseSome(some.Value));
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Svan.Monads
         /// </summary>
         public T DefaultWith(Func<T> defaultNone)
             => Match(
-                none => defaultNone(),
+                _ => defaultNone(),
                 some => some.Value);
         
         /// <summary>
@@ -113,7 +113,7 @@ namespace Svan.Monads
         /// </summary>
         public T OrThrow()
             => Match(
-                none => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
+                _ => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
                 some => some.Value);
         
         /// <summary>
@@ -121,9 +121,9 @@ namespace Svan.Monads
         /// </summary>
         public Option<TOut> Zip<TOut, TOther>(Option<TOther> other, Func<T, TOther, TOut> combine)
         {
-            if (this.IsSome() && other.IsSome())
+            if (IsSome() && other.IsSome())
             {
-                return combine(this.Value(), other.Value());
+                return combine(Value(), other.Value());
             }
 
             return Option<TOut>.None();
@@ -137,9 +137,9 @@ namespace Svan.Monads
             Option<TSecondOther> secondOther,
             Func<T, TFirstOther, TSecondOther, TOut> combine)
         {
-            if (this.IsSome() && firstOther.IsSome() && secondOther.IsSome())
+            if (IsSome() && firstOther.IsSome() && secondOther.IsSome())
             {
-                return combine(this.Value(), firstOther.Value(), secondOther.Value());
+                return combine(Value(), firstOther.Value(), secondOther.Value());
             }
 
             return Option<TOut>.None();
@@ -154,13 +154,13 @@ namespace Svan.Monads
             Option<TThirdOther> thirdOther,
             Func<T, TFirstOther, TSecondOther, TThirdOther, TOut> combine)
         {
-            if (this.IsSome()
+            if (IsSome()
                 && firstOther.IsSome()
                 && secondOther.IsSome()
                 && thirdOther.IsSome())
             {
                 return combine(
-                    this.Value(),
+                    Value(),
                     firstOther.Value(),
                     secondOther.Value(),
                     thirdOther.Value());
@@ -179,14 +179,14 @@ namespace Svan.Monads
             Option<TFourthOther> fourthOther,
             Func<T, TFirstOther, TSecondOther, TThirdOther, TFourthOther, TOut> combine)
         {
-            if (this.IsSome()
+            if (IsSome()
                 && firstOther.IsSome()
                 && secondOther.IsSome()
                 && thirdOther.IsSome()
                 && fourthOther.IsSome())
             {
                 return combine(
-                    this.Value(),
+                    Value(),
                     firstOther.Value(),
                     secondOther.Value(),
                     thirdOther.Value(),
@@ -201,7 +201,7 @@ namespace Svan.Monads
         /// </summary>
 
         public Result<TError, T> ToResult<TError>(Func<TError> defaultError)
-         => this.Fold<Result<TError, T>>(
+         => Fold<Result<TError, T>>(
                 () => defaultError(),
                 (value) => value
             );

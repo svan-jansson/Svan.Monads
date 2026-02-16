@@ -123,27 +123,15 @@ public class OptionTests
     [Fact]
     public void Use_filter_to_get_conditional_result()
     {
-        var expected = 5;
-        Option<int> option = 5;
-        var actual = option
+        Option<int>.Some(5)
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
-            .Match(
-                none => 0,
-                some => some.Value);
-
-        Assert.Equal(expected, actual);
-
-        expected = 0;
-        option = Option<int>.Some(4);
-        actual = option
+            .AssertSome(5);
+        
+        Option<int>.Some(4)
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
-            .Match(
-                none => 0,
-                some => some.Value);
-
-        Assert.Equal(expected, actual);
+            .AssertNone();
     }
 
     [Fact]
@@ -171,15 +159,11 @@ public class OptionTests
     {
         int i = default;
         i.ToOption()
-            .Switch(
-                none => Assert.Fail("should not be None"),
-                some => Assert.True(true, "should be Some<int>"));
+            .AssertSome(default);
 
         i = 5;
         i.ToOption()
-            .Switch(
-                none => Assert.Fail("should not be None"),
-                some => Assert.True(true, "should be Some<int>"));
+            .AssertSome(5);
     }
 
     [Fact]
@@ -187,15 +171,11 @@ public class OptionTests
     {
         TestClass t = default;
         t.ToOption()
-            .Switch(
-                none => Assert.True(true, "should be None"),
-                some => Assert.Fail("should not be Some<TestClass>"));
+            .AssertNone();
 
         t = new TestClass();
         t.ToOption()
-            .Switch(
-                none => Assert.Fail("should not be None"),
-                some => Assert.True(true, "should be Some<TestClass>"));
+            .AssertSome();
     }
 
     [Fact]

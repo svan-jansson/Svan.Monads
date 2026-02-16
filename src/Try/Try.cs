@@ -31,8 +31,8 @@ namespace Svan.Monads
     {
         public Try(Exception value) : base(value) { }
         public Try(TSuccess value) : base(value) { }
-        public static implicit operator Try<TSuccess>(TSuccess _) => new Try<TSuccess>(_);
-        public static implicit operator Try<TSuccess>(Exception _) => new Try<TSuccess>(_);
+        public static implicit operator Try<TSuccess>(TSuccess _) => new (_);
+        public static implicit operator Try<TSuccess>(Exception _) => new (_);
 
         /// <summary>
         /// Upcast to <c>Result&lt;Exception, TSuccess&gt;</c>.
@@ -53,18 +53,15 @@ namespace Svan.Monads
         /// </summary>
         public Try<TOut> BindCatching<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
-            if (IsSuccess())
+            if (!IsSuccess()) return ErrorValue();
+            try
             {
-                try
-                {
-                    return binder(SuccessValue());
-                }
-                catch (Exception ex)
-                {
-                    return ex;
-                }
+                return binder(SuccessValue());
             }
-            return ErrorValue();
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <summary>
@@ -72,11 +69,9 @@ namespace Svan.Monads
         /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// Exceptions thrown by the binder will propagate. Use <see cref="BindCatching{TOut}"/> to catch them instead.
         /// </summary>
-        public new Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
+        public Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
-            if (IsSuccess())
-                return binder(SuccessValue());
-            return ErrorValue();
+            return IsSuccess() ? binder(SuccessValue()) : ErrorValue();
         }
 
         /// <summary>
@@ -92,7 +87,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is <see cref="TSuccess"/>
+        /// Do lets you fire and forget an action that is executed only when the value is <see cref="TSuccess"/>
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
@@ -104,9 +99,9 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Do let's you fire and forget an action that is executed only when the value is <see cref="TError"/>
+        /// Do lets you fire and forget an action that is executed only when the value is <see cref="Exception"/>
         /// </summary>
-        /// <param name="do">An action that takes a single parameter of <see cref="TError"/></param>
+        /// <param name="do">An action that takes a single parameter of <see cref="Exception"/></param>
         /// <returns>The current state of the Result</returns>
         public new Try<TSuccess> DoIfError(Action<Exception> @do)
         {
@@ -118,7 +113,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
+        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Try<TSuccessOther> other,
             Func<TSuccess, TSuccessOther, TSuccessOut> combine)
         {
@@ -131,7 +126,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
+        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
@@ -145,7 +140,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public new Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
+        public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
             Try<TSuccessFirstOther> firstOther,
             Try<TSuccessSecondOther> secondOther,
             Try<TSuccessThirdOther> thirdOther,
@@ -160,7 +155,7 @@ namespace Svan.Monads
         /// <summary>
         /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
         /// </summary>
-        public new Try<TSuccessOut> Zip<
+        public Try<TSuccessOut> Zip<
             TSuccessOut,
             TSuccessFirstOther,
             TSuccessSecondOther,

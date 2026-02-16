@@ -21,21 +21,16 @@ namespace Svan.Monads.UnitTests
         public void Success_and_error_both_have_values()
         {
             var expectedSuccess = (12 / 2 / 2) * 2;
-            var expectedError = ErrorMessage;
 
-            Action<int> doMath = (divideBy)
-                => Divide(12, divideBy)
-                    .Bind(result => Divide(result, 2))
-                    .Map(result => result * 2)
-                    .Switch(
-                        error => throw new DivideByZeroException(error),
-                        success => Assert.Equal(expectedSuccess, success));
-
-            doMath(2);
-
-            var exception = Record.Exception(() => doMath(0));
-            Assert.IsType<DivideByZeroException>(exception);
-            Assert.Equal(expectedError, exception.Message);
+            Divide(12, 2)
+                .Bind(result => Divide(result, 2))
+                .Map(result => result * 2)
+                .AssertSuccess(expectedSuccess);
+            
+            Divide(12, 0)
+                .Bind(result => Divide(result, 2))
+                .Map(result => result * 2)
+                .AssertError(ErrorMessage);
         }
 
         [Fact]
@@ -94,14 +89,10 @@ namespace Svan.Monads.UnitTests
         public void Result_can_be_downcasted_to_option()
         {
             Result<Exception, int> result = new Exception("this is an error");
-            result.ToOption().Switch(
-                none => Assert.True(true, "Error should map to None"),
-                some => Assert.Fail("this should not be executed"));
+            result.ToOption().AssertNone();
 
             result = 5;
-            result.ToOption().Switch(
-                none => Assert.Fail("this should not be executed"),
-                some => Assert.Equal(5, some.Value));
+            result.ToOption().AssertSome(5);
         }
 
         [Fact]
@@ -209,36 +200,6 @@ namespace Svan.Monads.UnitTests
         }
 
         [Fact]
-        public void Pattern_using_OneOf_as_error_type()
-        {
-            Result<CustomerError, Customer> ValidateEmail(Customer customer)
-            {
-                if (customer.Email.Contains("@")) return customer;
-                else return new CustomerError(new InvalidEmail());
-            }
-
-            Result<CustomerError, Customer> ValidatePhoneNumber(Customer customer)
-            {
-                if (customer.PhoneNumber.Contains("+")) return customer;
-                else return new CustomerError(new InvalidPhoneNumber());
-            }
-
-            var input = new Customer() { Email = "valid@email.com", PhoneNumber = "invalid" };
-
-            var expected = "invalid phone number";
-
-            var actual = ValidateEmail(input)
-                .Bind(ValidatePhoneNumber)
-                .Map(customer => $"valid customer: ${customer.Email} - ${customer.PhoneNumber}")
-                .MapError(error => error.Match(
-                    invalidEmail => "invalid email",
-                    invalidPhoneNumber => "invalid phone number"
-                ));
-
-            Assert.Equal(expected, actual.ErrorValue());
-        }
-        
-        [Fact]
         public void OrThrow_throws_an_invalid_operation_exception()
         {
             var resultError = Result<int, int>.Error(0);
@@ -261,21 +222,5 @@ namespace Svan.Monads.UnitTests
                 .Recover((error) => Result<string, int>.Error("error"));
             Assert.Equal("error", actualRecoverError.ErrorValue());
         }
-
-        class Customer
-        {
-            public string Email { get; set; }
-            public string PhoneNumber { get; set; }
-        }
-
-        class InvalidEmail { }
-        class InvalidPhoneNumber { }
-
-        class CustomerError : Union<InvalidEmail, InvalidPhoneNumber>
-        {
-            public CustomerError(InvalidEmail input) : base(input) { }
-            public CustomerError(InvalidPhoneNumber input) : base(input) { }
-        }
-
     }
 }
