@@ -10,11 +10,11 @@ namespace Svan.Monads
         public Result(TError value) : base(value) { }
         public Result(TSuccess value) : base(value) { }
 
-        public static implicit operator Result<TError, TSuccess>(TSuccess value) => new Result<TError, TSuccess>(value);
-        public static implicit operator Result<TError, TSuccess>(TError value) => new Result<TError, TSuccess>(value);
+        public static implicit operator Result<TError, TSuccess>(TSuccess value) => new (value);
+        public static implicit operator Result<TError, TSuccess>(TError value) => new (value);
 
-        public static Result<TError, TSuccess> Error(TError value) => new Result<TError, TSuccess>(value);
-        public static Result<TError, TSuccess> Success(TSuccess value) => new Result<TError, TSuccess>(value);
+        public static Result<TError, TSuccess> Error(TError value) => new (value);
+        public static Result<TError, TSuccess> Success(TSuccess value) => new (value);
 
         /// <summary>
         /// Returns <c>true</c> if the result is in the error state.

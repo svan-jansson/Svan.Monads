@@ -95,13 +95,13 @@ namespace Svan.Monads.UnitTests
         {
             Result<Exception, int> result = new Exception("this is an error");
             result.ToOption().Switch(
-                () => Assert.True(true, "Error should map to None"),
+                none => Assert.True(true, "Error should map to None"),
                 some => Assert.Fail("this should not be executed"));
 
             result = 5;
             result.ToOption().Switch(
-                () => Assert.Fail("this should not be executed"),
-                some => Assert.Equal(5, some));
+                none => Assert.Fail("this should not be executed"),
+                some => Assert.Equal(5, some.Value));
         }
 
         [Fact]
