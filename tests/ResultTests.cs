@@ -9,11 +9,11 @@ namespace Svan.Monads.UnitTests
         {
             if (by == 0)
             {
-                return new Error<string>(ErrorMessage);
+                return Result<string, int>.Error(ErrorMessage);
             }
             else
             {
-                return new Success<int>(number / by);
+                return Result<string, int>.Success(number / by);
             }
         }
 
@@ -28,8 +28,8 @@ namespace Svan.Monads.UnitTests
                     .Bind(result => Divide(result, 2))
                     .Map(result => result * 2)
                     .Switch(
-                        error => throw new DivideByZeroException(error.Value),
-                        success => Assert.Equal(expectedSuccess, success.Value));
+                        error => throw new DivideByZeroException(error),
+                        success => Assert.Equal(expectedSuccess, success));
 
             doMath(2);
 
@@ -44,16 +44,16 @@ namespace Svan.Monads.UnitTests
             var maxLimitException = new Exception();
             maxLimitException.Data.Add("max", 25);
 
-            Result<Exception, int> add5(int val) => new Success<int>(val + 5);
+            Result<Exception, int> add5(int val) => Result<Exception, int>.Success(val + 5);
             Result<Exception, int> checkIsBelow25(int val)
             {
                 if (val > 25)
                 {
-                    return new Error<Exception>(maxLimitException);
+                    return Result<Exception, int>.Error(maxLimitException);
                 }
                 else
                 {
-                    return new Success<int>(val);
+                    return Result<Exception, int>.Success(val);
                 }
             }
 
@@ -95,13 +95,13 @@ namespace Svan.Monads.UnitTests
         {
             Result<Exception, int> result = new Exception("this is an error");
             result.ToOption().Switch(
-                none => Assert.True(true, "Error should map to None"),
+                () => Assert.True(true, "Error should map to None"),
                 some => Assert.Fail("this should not be executed"));
 
             result = 5;
             result.ToOption().Switch(
-                none => Assert.Fail("this should not be executed"),
-                some => Assert.Equal(5, some.Value));
+                () => Assert.Fail("this should not be executed"),
+                some => Assert.Equal(5, some));
         }
 
         [Fact]

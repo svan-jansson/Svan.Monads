@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Svan.Monads
 {
@@ -29,12 +29,10 @@ namespace Svan.Monads
     /// </summary>
     public class Try<TSuccess> : Result<Exception, TSuccess>
     {
-        public Try(Error<Exception> value) : base(value) { }
-        public Try(Success<TSuccess> value) : base(value) { }
-        public static implicit operator Try<TSuccess>(Error<Exception> _) => new Try<TSuccess>(_);
-        public static implicit operator Try<TSuccess>(Success<TSuccess> _) => new Try<TSuccess>(_);
-        public static implicit operator Try<TSuccess>(TSuccess _) => new Success<TSuccess>(_);
-        public static implicit operator Try<TSuccess>(Exception _) => new Error<Exception>(_);
+        public Try(Exception value) : base(value) { }
+        public Try(TSuccess value) : base(value) { }
+        public static implicit operator Try<TSuccess>(TSuccess _) => new Try<TSuccess>(_);
+        public static implicit operator Try<TSuccess>(Exception _) => new Try<TSuccess>(_);
 
         /// <summary>
         /// Upcast to <c>Result&lt;Exception, TSuccess&gt;</c>.
