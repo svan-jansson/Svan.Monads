@@ -8,12 +8,11 @@ using Svan.Monads;
 StreamOfIntegers(randomInteger =>
 {
     var result = randomInteger.ToOption()
-                    .Filter(i => i > 50)
-                    .Map(i => i * 99)
-                    .Bind<int>(i => i % 2 == 0 ? new Some<int>(i) : new None())
-                    .Match(
-                        none => "did not pass checks",
-                        some => $"{randomInteger} is above 50 and becomes the even number {some.Value} when multiplied by 99");
+        .Filter(i => i > 50)
+        .Map(i => i * 99)
+        .Bind<int>(i => i % 2 == 0 ? new Some<int>(i) : new None())
+        .Map(some => $"{randomInteger} is above 50 and becomes the even number {some} when multiplied by 99")
+        .DefaultWith(() => "did not pass checks");
 
     Console.WriteLine(result);
 });

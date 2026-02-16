@@ -5,7 +5,6 @@ Using real world football standings provided by Azhari Muhammad Marzan - https:/
 */
 
 using Svan.Monads;
-using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -32,26 +31,25 @@ static void WhichTeamWon(string leagueId, int season)
 
 static Result<LookupError, League> GetLeague(Query query)
     => TryCallApi($"leagues/{query.LeagueId}")
-            .Match<Result<LookupError, League>>(
-                error => new LookupError($"Could not get league: {error.Value.Message}"),
-                success => new League(success.Value["data"]["id"].ToString(), query));
+            .Fold<Result<LookupError, League>>(
+                error => new LookupError($"Could not get league: {error.Message}"),
+                success => new League(success["data"]!["id"]!.ToString(), query));
 
 static Result<LookupError, Season> GetSeason(League league)
     => TryCallApi($"leagues/{league.Id}/standings?season={league.Query.Season}&sort=asc")
-            .Match<Result<LookupError, Season>>(
-                error => new LookupError($"Could not get league: {error.Value.Message}"),
-                success => new Season(Convert.ToInt32(success.Value["data"]["season"]), league.Query));
+            .Fold<Result<LookupError, Season>>(
+                error => new LookupError($"Could not get league: {error.Message}"),
+                success => new Season(Convert.ToInt32(success["data"]!["season"]), league.Query));
 
 static Result<LookupError, IEnumerable<Team>> GetParticipants(Season season)
     => TryCallApi($"leagues/{season.Query.LeagueId}/standings?season={season.Year}&sort=asc")
-            .Match<Result<LookupError, IEnumerable<Team>>>(
-                error => new LookupError($"Could not get participants: {error.Value.Message}"),
+            .Fold<Result<LookupError, IEnumerable<Team>>>(
+                error => new LookupError($"Could not get participants: {error.Message}"),
                 success =>
                 {
-                    var participants = success
-                                .Value["data"]["standings"]
+                    var participants = success["data"]!["standings"]!
                                 .Select((item, rank) => new Team(
-                                    item["team"]["name"].ToString(),
+                                    item["team"]!["name"]!.ToString(),
                                     rank + 1,
                                     season.Query));
 
@@ -61,7 +59,7 @@ static Result<LookupError, IEnumerable<Team>> GetParticipants(Season season)
 static Result<LookupError, Team> GetWinner(IEnumerable<Team> teams)
 {
     var winner = teams.FirstOrDefault(team => team.Rank == 1);
-    if (winner != default)
+    if (winner != null)
     {
         return winner;
     }
