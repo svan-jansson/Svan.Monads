@@ -18,7 +18,7 @@ dotnet add package Svan.Monads
 
 ## The Option Monad
 
-The `Option<T>` monad extends `OneOf<None, Some<T>>` and is modeled after [F#'s Option Type](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/options). It is functionally similar to [Haskell's Maybe Monad](https://wiki.haskell.org/Maybe).
+The `Option<T>` monad is modeled after [F#'s Option Type](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/options). It is functionally similar to [Haskell's Maybe Monad](https://wiki.haskell.org/Maybe).
 
 This monad provides a mechanism for conditional execution in a workflow/pipeline-style manner. Great for readability and error handling without `try`/`catch`.
 
