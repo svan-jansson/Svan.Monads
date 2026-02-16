@@ -11,4 +11,4 @@ public readonly struct Some<T>(T value)
 /// <summary>
 /// Represents no value
 /// </summary>
-public readonly struct None { };
+public readonly struct None;
