@@ -128,7 +128,7 @@ public class OptionTests
         var actual = option
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
-            .Fold(
+            .Match(
                 none => 0,
                 some => some.Value);
 
@@ -139,7 +139,7 @@ public class OptionTests
         actual = option
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
-            .Fold(
+            .Match(
                 none => 0,
                 some => some.Value);
 
@@ -171,13 +171,13 @@ public class OptionTests
     {
         int i = default;
         i.ToOption()
-            .Iter(
+            .Switch(
                 none => Assert.Fail("should not be None"),
                 some => Assert.True(true, "should be Some<int>"));
 
         i = 5;
         i.ToOption()
-            .Iter(
+            .Switch(
                 none => Assert.Fail("should not be None"),
                 some => Assert.True(true, "should be Some<int>"));
     }
@@ -187,13 +187,13 @@ public class OptionTests
     {
         TestClass t = default;
         t.ToOption()
-            .Iter(
+            .Switch(
                 none => Assert.True(true, "should be None"),
                 some => Assert.Fail("should not be Some<TestClass>"));
 
         t = new TestClass();
         t.ToOption()
-            .Iter(
+            .Switch(
                 none => Assert.Fail("should not be None"),
                 some => Assert.True(true, "should be Some<TestClass>"));
     }

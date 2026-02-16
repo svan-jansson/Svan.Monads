@@ -27,7 +27,7 @@ namespace Svan.Monads.UnitTests
                 => Divide(12, divideBy)
                     .Bind(result => Divide(result, 2))
                     .Map(result => result * 2)
-                    .Iter(
+                    .Switch(
                         error => throw new DivideByZeroException(error.Value),
                         success => Assert.Equal(expectedSuccess, success.Value));
 
@@ -94,12 +94,12 @@ namespace Svan.Monads.UnitTests
         public void Result_can_be_downcasted_to_option()
         {
             Result<Exception, int> result = new Exception("this is an error");
-            result.ToOption().Iter(
+            result.ToOption().Switch(
                 none => Assert.True(true, "Error should map to None"),
                 some => Assert.Fail("this should not be executed"));
 
             result = 5;
-            result.ToOption().Iter(
+            result.ToOption().Switch(
                 none => Assert.Fail("this should not be executed"),
                 some => Assert.Equal(5, some.Value));
         }
@@ -230,7 +230,7 @@ namespace Svan.Monads.UnitTests
             var actual = ValidateEmail(input)
                 .Bind(ValidatePhoneNumber)
                 .Map(customer => $"valid customer: ${customer.Email} - ${customer.PhoneNumber}")
-                .MapError(error => error.Fold(
+                .MapError(error => error.Match(
                     invalidEmail => "invalid email",
                     invalidPhoneNumber => "invalid phone number"
                 ));

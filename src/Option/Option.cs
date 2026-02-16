@@ -37,7 +37,7 @@ namespace Svan.Monads
         /// <param name="binder">A function that returns an <c>Option&lt;TOut&gt;</c></param>
         /// <returns>An option of the output type of the binder. </returns>
         public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
-            => Fold(
+            => Match(
                 none => none,
                 some => binder(some.Value));
 
@@ -48,7 +48,7 @@ namespace Svan.Monads
         /// <typeparam name="TOut"></typeparam>
         /// <returns>An option of the output type of the mapping</returns>
         public Option<TOut> Map<TOut>(Func<T, TOut> mapping)
-            => Fold(
+            => Match(
                 none => Option<TOut>.None(),
                 some => Option<TOut>.Some(mapping(some.Value)));
 
@@ -58,7 +58,7 @@ namespace Svan.Monads
         /// <param name="filter"></param>
         /// <returns><c>Some</c> when filter returns true. <c>None</c> when filter returns false or current state of option is <c>None</c></returns>
         public Option<T> Filter(Func<T, bool> filter)
-            => Fold(
+            => Match(
                 none => none,
                 some => filter(some.Value) ? some : None());
 
@@ -96,7 +96,7 @@ namespace Svan.Monads
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>None</c> and case <c>Some</c>.
         /// </summary>
         public TOut Fold<TOut>(Func<TOut> caseNone, Func<T, TOut> caseSome)
-            => base.Fold(
+            => Match(
                 none => caseNone(),
                 some => caseSome(some.Value));
 
@@ -104,7 +104,7 @@ namespace Svan.Monads
         /// Get the value of <c>Some</c> or a default value from the supplied function.
         /// </summary>
         public T DefaultWith(Func<T> defaultNone)
-            => Fold(
+            => Match(
                 none => defaultNone(),
                 some => some.Value);
         
@@ -112,7 +112,7 @@ namespace Svan.Monads
         /// Get the value of <c>Some</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
         public T OrThrow()
-            => Fold(
+            => Match(
                 none => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
                 some => some.Value);
         

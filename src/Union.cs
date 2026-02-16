@@ -33,10 +33,10 @@ namespace Svan.Monads
             ? (TRight)_value
             : throw new InvalidOperationException("Cannot access Right when value is Left.");
 
-        public TOut Fold<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
+        public TOut Match<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
             => _index == 0 ? f0((TLeft)_value) : f1((TRight)_value);
 
-        public void Iter(Action<TLeft> f0, Action<TRight> f1)
+        public void Switch(Action<TLeft> f0, Action<TRight> f1)
         {
             if (_index == 0)
                 f0((TLeft)_value);
