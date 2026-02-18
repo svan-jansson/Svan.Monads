@@ -35,19 +35,19 @@ namespace Svan.Monads
             _right = value.Value;
         }
 
-        internal bool IsLeft => _isLeft;
+        public bool IsLeft => _isLeft;
 
-        internal bool IsRight => !_isLeft;
+        public bool IsRight => !_isLeft;
 
-        internal TLeft AsLeft => _isLeft
+        protected TLeft AsLeft => _isLeft
             ? _left
             : throw new NullReferenceException("Cannot access Left when value is Right.");
 
-        internal TRight AsRight => !_isLeft
+        protected TRight AsRight => !_isLeft
             ? _right
             : throw new NullReferenceException("Cannot access Right when value is Left.");
 
-        internal TOut Match<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
+        public TOut Match<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
             => _isLeft ? f0(_left) : f1(_right);
 
         public static implicit operator Union<TLeft, TRight>(Left<TLeft> value) => new(value);
