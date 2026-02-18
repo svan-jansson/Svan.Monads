@@ -1,6 +1,6 @@
 [![Build, Test & Publish](https://github.com/svan-jansson/Svan.Monads/actions/workflows/build-test-publish.yml/badge.svg)](https://github.com/svan-jansson/Svan.Monads/actions/workflows/build-test-publish.yml) [![Nuget](https://img.shields.io/nuget/v/Svan.Monads)](https://www.nuget.org/packages/Svan.Monads/)
 
-# Common Monads
+# Svan.Monads
 
 This library adds some common monads to C#, enabling "Railway Oriented Programming" and functional programming styles. It includes the `Option<T>`, `Result<TError, TSuccess>`, and `Try<TSuccess>` monads, along with extension methods for fluent chaining, async, and error handling.
 
@@ -16,7 +16,7 @@ dotnet add package Svan.Monads
 - [Using the Result monad to compose data from different API calls](examples/result-examples/Program.cs)
 - [Using the Result monad with a OneOf type as error](examples/esoteric-examples/Program.cs)
 
-## Breaking changes in version 2.0.x
+## Breaking changes in version 2.x
 
 The library no longer depends on `OneOf`. The monads now inherit from a built-in `Union<TLeft, TRight>` base class that is discriminated using `Left<T>` and `Right<T>` wrapper types.
 
@@ -84,13 +84,6 @@ Construction now uses explicit factory methods instead of implicit operators.
 - Try<int> failed = new Exception("boom");
 + var tried = Try<int>.Success(42);
 + var failed = Try<int>.Exception(new Exception("boom"));
-```
-
-### `Option` implicit conversion from `None` is unchanged
-
-```csharp
-// This still works
-Option<int> none = new None();
 ```
 
 ## The Option Monad

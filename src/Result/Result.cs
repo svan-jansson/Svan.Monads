@@ -106,6 +106,12 @@ namespace Svan.Monads
         /// </summary>
         public TSuccess DefaultWith(Func<TError, TSuccess> fallback)
             => Match(fallback, success => success);
+        
+        /// <summary>
+        /// Get the value of <c>TSuccess</c> or a default value from the supplied value.
+        /// </summary>
+        public TSuccess DefaultWith(TSuccess fallback)
+            => Match(_ => fallback, success => success);
 
         /// <summary>
         /// Get the value of <c>TSuccess</c> or throw a <see cref="NullReferenceException"/>.
