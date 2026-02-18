@@ -73,7 +73,7 @@ static Result<Exception, JObject> TryCallApi(string path)
     }
     catch (Exception ex)
     {
-        return Result.Error<Exception, JObject>(ex); ;
+        return Result.Error<Exception, JObject>(ex);
     }
 }
 

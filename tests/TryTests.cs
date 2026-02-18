@@ -140,6 +140,38 @@ namespace Svan.Monads.UnitTests
             Assert.Empty(sequenced.SuccessValue());
         }
 
+        [Fact]
+        public void Zip_returns_exception_from_other_when_this_is_success_and_other_is_error()
+        {
+            var success = Try<int>.Success(1);
+            var error = Try<int>.Exception(new Exception("other failed"));
+
+            var result = success.Zip(error, (a, b) => a + b);
+
+            Assert.True(result.IsError());
+            Assert.Equal("other failed", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public void Zip_returns_exception_from_this_when_this_is_error_and_other_is_success()
+        {
+            var error = Try<int>.Exception(new Exception("this failed"));
+            var success = Try<int>.Success(1);
+
+            var result = error.Zip(success, (a, b) => a + b);
+
+            Assert.True(result.IsError());
+            Assert.Equal("this failed", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public void Zip_returns_success_when_both_are_success()
+        {
+            var result = Try<int>.Success(3).Zip(Try<int>.Success(4), (a, b) => a + b);
+
+            Assert.Equal(7, result.SuccessValue());
+        }
+
         class ErrorThatIsNotAnExceptionType { }
     }
 }

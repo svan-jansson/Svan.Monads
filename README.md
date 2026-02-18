@@ -108,7 +108,7 @@ var fromValue = 42.ToOption();
 ### Monadic operations
 
 ```csharp
-Option<int> option = 42;
+var option = Option.some(42);
 
 var result = option
     .Filter(i => i > 10)
@@ -122,7 +122,7 @@ var result = option
 ### Unboxing
 
 ```csharp
-Option<int> option = 42;
+var option = Option.some(42);
 
 // Fold with handlers for both cases
 string message = option.Fold(

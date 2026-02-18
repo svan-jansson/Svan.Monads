@@ -95,7 +95,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessOther, TSuccessOut> combine)
         {
             var result = base.Zip(other, combine);
-            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(result.ErrorValue());
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, combine);
-            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(result.ErrorValue());
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, thirdOther, combine);
-            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(result.ErrorValue());
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Svan.Monads
                 TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, thirdOther, fourthOther, combine);
-            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(result.ErrorValue());
         }
     }
 }
