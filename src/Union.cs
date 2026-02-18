@@ -28,11 +28,11 @@ namespace Svan.Monads
 
         internal TLeft AsLeft => _value is Left<TLeft> left
             ? left.Value
-            : throw new InvalidOperationException("Cannot access Left when value is Right.");
+            : throw new NullReferenceException("Cannot access Left when value is Right.");
 
         internal TRight AsRight => _value is Right<TRight> right
             ? right.Value
-            : throw new InvalidOperationException("Cannot access Right when value is Left.");
+            : throw new NullReferenceException("Cannot access Right when value is Left.");
 
         internal TOut Match<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
             => _value switch

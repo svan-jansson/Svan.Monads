@@ -16,6 +16,83 @@ dotnet add package Svan.Monads
 - [Using the Result monad to compose data from different API calls](examples/result-examples/Program.cs)
 - [Using the Result monad with a OneOf type as error](examples/esoteric-examples/Program.cs)
 
+## Breaking changes in version 2.0.x
+
+The library no longer depends on `OneOf`. The monads now inherit from a built-in `Union<TLeft, TRight>` base class that is discriminated using `Left<T>` and `Right<T>` wrapper types.
+
+### `OneOfBase` is no longer the base class
+
+The `Match` and `Switch` methods from OneOf (which received wrapper types like `Error<T>`, `Success<T>`, `Some<T>`) are replaced by `Fold`, which receives the unwrapped values directly.
+
+```diff
+  // Option: Match/Switch took None and Some<T>
+- option.Match(
+-     none => "nothing",
+-     some => $"got {some.Value}");
++ option.Fold(
++     () => "nothing",
++     value => $"got {value}");
+
+  // Option: void side-effects used Switch
+- option.Switch(
+-     none => Console.WriteLine("nothing"),
+-     some => Console.WriteLine(some.Value));
++ option.Do(value => Console.WriteLine(value))
++       .DoIfNone(() => Console.WriteLine("nothing"));
+
+  // Result: Match/Switch took Error<TError> and Success<TSuccess>
+- result.Match(
+-     error => $"failed: {error.Value}",
+-     success => $"got {success.Value}");
++ result.Fold(
++     error => $"failed: {error}",
++     success => $"got {success}");
+
+  // Result: void side-effects used Switch
+- result.Switch(
+-     error => Console.WriteLine(error.Value),
+-     success => Console.WriteLine(success.Value));
++ result.Do(success => Console.WriteLine(success))
++       .DoIfError(error => Console.WriteLine(error));
+```
+
+### `Error<T>`, `Success<T>` and `Some<T>` have been removed
+
+These OneOf wrapper types are no longer needed. `Union` now uses `Left<T>` and `Right<T>` internally for discrimination, and all public APIs work with the unwrapped values directly.
+
+```diff
+- Option<int> option = new Some<int>(42);
++ Option<int> option = Option<int>.Some(42);
+
+- Result<string, int> result = new Success<int>(42);
+- Result<string, int> error = new Error<string>("fail");
++ var result = Result<string, int>.Success(42);
++ var error = Result<string, int>.Error("fail");
+```
+
+### `Result` and `Try` no longer have implicit conversions
+
+Construction now uses explicit factory methods instead of implicit operators.
+
+```diff
+- Result<string, int> result = 42;
+- Result<string, int> error = "something went wrong";
++ var result = Result<string, int>.Success(42);
++ var error = Result<string, int>.Error("something went wrong");
+
+- Try<int> tried = 42;
+- Try<int> failed = new Exception("boom");
++ var tried = Try<int>.Success(42);
++ var failed = Try<int>.Exception(new Exception("boom"));
+```
+
+### `Option` implicit conversion from `None` is unchanged
+
+```csharp
+// This still works
+Option<int> none = new None();
+```
+
 ## The Option Monad
 
 The `Option<T>` monad represents a value that may or may not exist. It is modeled after [F#'s Option Type](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/options) and is functionally similar to [Haskell's Maybe Monad](https://wiki.haskell.org/Maybe).
