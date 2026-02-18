@@ -104,7 +104,7 @@ namespace Svan.Monads
             => Fold(
                 defaultNone,
                 value => value);
-        
+
         /// <summary>
         /// Get the value of <c>Some</c> or a default value from the supplied function.
         /// </summary>
@@ -112,7 +112,7 @@ namespace Svan.Monads
             => Fold(
                 () => defaultNone,
                 value => value);
-        
+
         /// <summary>
         /// Get the value of <c>Some</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
