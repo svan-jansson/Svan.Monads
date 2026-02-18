@@ -2,7 +2,7 @@
 
 # Svan.Monads
 
-This library adds some common monads to C#, enabling "Railway Oriented Programming" and functional programming styles. It includes the `Option<T>`, `Result<TError, TSuccess>`, and `Try<TSuccess>` monads, along with extension methods for fluent chaining, async, and error handling.
+This library adds some common monads to C#, enabling "Railway Oriented Programming" and functional programming styles. It includes the `Option<T>`, `Result<TError, TSuccess>`, `Try<TSuccess>`, and `Either<TLeft, TRight>` monads, along with extension methods for fluent chaining, async, and error handling.
 
 ## Installation
 
@@ -251,13 +251,72 @@ int value = tried.DefaultWith(ex => -1);
 int certain = tried.OrThrow();
 ```
 
+## The Either Monad
+
+The `Either<TLeft, TRight>` monad is a general-purpose discriminated union where both sides carry meaning. It is right-biased for chainable pipelines, but without the opinionated error/success semantics of `Result`. Use `Either` when both outcomes are valid domain values.
+
+### Constructing
+
+```csharp
+// Using factory methods
+var left = Either<string, int>.FromLeft("heads");
+var right = Either<string, int>.FromRight(42);
+
+// Using the non-generic static class
+var left2 = Either.FromLeft<string, int>("heads");
+var right2 = Either.FromRight<string, int>(42);
+
+// Using extension methods
+var left3 = "heads".ToLeft<string, int>();
+var right3 = 42.ToRight<string, int>();
+```
+
+### Monadic operations
+
+```csharp
+var either = Either<string, int>.FromRight(21);
+
+var result = either
+    .Map(n => n * 2)
+    .Bind(n => n > 0
+        ? Either<string, int>.FromRight(n)
+        : Either<string, int>.FromLeft("non-positive"))
+    .MapLeft(msg => msg.ToUpper())
+    .Do(n => Console.WriteLine($"Right: {n}"))
+    .DoIfLeft(msg => Console.WriteLine($"Left: {msg}"));
+```
+
+### Unboxing
+
+```csharp
+var either = Either<string, int>.FromRight(42);
+
+// Fold with handlers for both cases
+string message = either.Fold(
+    left => $"left: {left}",
+    right => $"right: {right}");
+
+// Get the right value or a default derived from the left value
+int value = either.DefaultWith(left => -1);
+
+// Get the right value or throw
+int certain = either.OrThrow();
+
+// Swap left and right sides
+Either<int, string> swapped = either.Swap();
+
+// Convert to Option (left becomes None) or Result (left becomes Error)
+Option<int> option = either.ToOption();
+Result<string, int> result = either.ToResult();
+```
+
 ## Async Support
 
 Support of async workflows is added as a small set of extension methods. Sync operations work naturally after an `await`, and only callbacks that are themselves async need async-specific methods.
 
 ### Awaiting then chaining sync operations
 
-When an async function returns an `Option<T>`, `Result<TError, T>`, or `Try<T>`, you can `await` it and then chain any sync operation as usual:
+When an async function returns an `Option<T>`, `Result<TError, T>`, `Try<T>`, or `Either<TLeft, TRight>`, you can `await` it and then chain any sync operation as usual:
 
 ```csharp
 async Task<Option<int>> FindUserId(string username) { ... }
@@ -281,7 +340,7 @@ var result = await FindUserId("malin")
     .MapAsync(email => NormalizeEmail(email));
 ```
 
-These work the same way on `Result` and `Try`:
+These work the same way on `Result`, `Try`, and `Either`:
 
 ```csharp
 async Task<Result<string, int>> ParseUserId(string input) { ... }
@@ -291,6 +350,16 @@ var greeting = (await ParseUserId("42")
         .BindAsync(id => LookupUsername(id)))
     .Map(name => $"Welcome, {name}!")
     .DefaultWith(error => $"Error: {error}");
+```
+
+```csharp
+async Task<Either<string, int>> ParseId(string input) { ... }
+async Task<Either<string, string>> LookupName(int id) { ... }
+
+var greeting = (await ParseId("42")
+        .BindAsync(id => LookupName(id)))
+    .Map(name => $"Welcome, {name}!")
+    .DefaultWith(left => $"Left: {left}");
 ```
 
 ### Sequence
@@ -305,4 +374,4 @@ var result = await email
     .Sequence();
 ```
 
-This also works on `Result` and `Try`, skipping the async work when in the error/none state.
+This also works on `Result`, `Try`, and `Either`, skipping the async work when in the error/left state.
