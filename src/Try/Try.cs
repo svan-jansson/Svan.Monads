@@ -3,36 +3,15 @@ using System;
 namespace Svan.Monads
 {
     /// <summary>
-    /// Factory for creating <c>Try&lt;TSuccess&gt;</c> instances by catching exceptions.
-    /// </summary>
-    public static class Try
-    {
-        /// <summary>
-        /// Execute <paramref name="codeBlock"/> and return its result as <c>Success</c>.
-        /// If the code block throws, the exception is caught and returned as the error state.
-        /// </summary>
-        public static Try<TSuccess> Catching<TSuccess>(Func<TSuccess> codeBlock)
-        {
-            try
-            {
-                return codeBlock();
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
-        }
-    }
-
-    /// <summary>
     /// A specialization of <c>Result&lt;Exception, TSuccess&gt;</c> that provides exception-catching operations.
     /// </summary>
     public class Try<TSuccess> : Result<Exception, TSuccess>
     {
-        public Try(Exception value) : base(value) { }
-        public Try(TSuccess value) : base(value) { }
-        public static implicit operator Try<TSuccess>(TSuccess _) => new (_);
-        public static implicit operator Try<TSuccess>(Exception _) => new (_);
+        internal Try(Left<Exception> value) : base(value) { }
+        internal Try(Right<TSuccess> value) : base(value) { }
+
+        public static Try<TSuccess> Exception(Exception value) => new(new Left<Exception>(value));
+        public new static Try<TSuccess> Success(TSuccess value) => new(new Right<TSuccess>(value));
 
         /// <summary>
         /// Upcast to <c>Result&lt;Exception, TSuccess&gt;</c>.
@@ -43,8 +22,8 @@ namespace Svan.Monads
         /// Map the success value using a mapping function, catching any exception thrown by the mapper.
         /// </summary>
         public Try<TOut> MapCatching<TOut>(Func<TSuccess, TOut> mapper)
-            => Fold(
-                 error => error,
+            => Fold<Try<TOut>>(
+                 Try.Exception<TOut>,
                  success => Try.Catching(() => mapper(success)));
 
         /// <summary>
@@ -53,14 +32,14 @@ namespace Svan.Monads
         /// </summary>
         public Try<TOut> BindCatching<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
-            if (!IsSuccess()) return ErrorValue();
+            if (!IsSuccess()) return Try.Exception<TOut>(ErrorValue());
             try
             {
                 return binder(SuccessValue());
             }
             catch (Exception ex)
             {
-                return ex;
+                return Try.Exception<TOut>(ex);
             }
         }
 
@@ -71,7 +50,7 @@ namespace Svan.Monads
         /// </summary>
         public Try<TOut> Bind<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
-            return IsSuccess() ? binder(SuccessValue()) : ErrorValue();
+            return IsSuccess() ? binder(SuccessValue()) : Try.Exception<TOut>(ErrorValue());
         }
 
         /// <summary>
@@ -81,9 +60,7 @@ namespace Svan.Monads
         /// </summary>
         public new Try<TOut> Map<TOut>(Func<TSuccess, TOut> mapper)
         {
-            if (IsSuccess())
-                return mapper(SuccessValue());
-            return ErrorValue();
+            return IsSuccess() ? Try.Success(mapper(SuccessValue())) : Try.Exception<TOut>(ErrorValue());
         }
 
         /// <summary>
@@ -118,9 +95,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessOther, TSuccessOut> combine)
         {
             var result = base.Zip(other, combine);
-            if (result.IsSuccess())
-                return result.SuccessValue();
-            return result.ErrorValue();
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
         }
 
         /// <summary>
@@ -132,9 +107,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, combine);
-            if (result.IsSuccess())
-                return result.SuccessValue();
-            return result.ErrorValue();
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
         }
 
         /// <summary>
@@ -147,9 +120,7 @@ namespace Svan.Monads
             Func<TSuccess, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther, TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, thirdOther, combine);
-            if (result.IsSuccess())
-                return result.SuccessValue();
-            return result.ErrorValue();
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
         }
 
         /// <summary>
@@ -174,9 +145,7 @@ namespace Svan.Monads
                 TSuccessOut> combine)
         {
             var result = base.Zip(firstOther, secondOther, thirdOther, fourthOther, combine);
-            if (result.IsSuccess())
-                return result.SuccessValue();
-            return result.ErrorValue();
+            return result.IsSuccess() ? Try.Success(result.SuccessValue()) : Try.Exception<TSuccessOut>(ErrorValue());
         }
     }
 }

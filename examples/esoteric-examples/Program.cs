@@ -47,8 +47,8 @@ Result<CustomerError, CreateCustomerInput> ValidatePhoneNumber(CreateCustomerInp
 
 Result<CustomerError, CustomerCreated> SaveCustomer(CreateCustomerInput input)
     => Randomizer.ShouldFail()
-        ? new CustomerError(new DatabaseNotReachable("Random database error occurred"))
-        : new CustomerCreated(Guid.NewGuid(), input.Email, input.PhoneNumber);
+        ? new CustomerError(new DatabaseNotReachable("Random database error occurred")).ToError<CustomerError, CustomerCreated>()
+        : new CustomerCreated(Guid.NewGuid(), input.Email, input.PhoneNumber).ToSuccess<CustomerError, CustomerCreated>();
 
 #endregion
 
@@ -66,7 +66,7 @@ class CustomerError : OneOfBase<
     DatabaseNotReachable>
 {
     public CustomerError(OneOf<InvalidEmail, InvalidPhoneNumber, DatabaseNotReachable> input) : base(input) { }
-    public static implicit operator CustomerError(InvalidEmail _) => new (_);
+    public static implicit operator CustomerError(InvalidEmail _) => new(_);
     public static implicit operator CustomerError(InvalidPhoneNumber _) => new(_);
     public static implicit operator CustomerError(DatabaseNotReachable _) => new(_);
 }
@@ -78,4 +78,4 @@ static class Randomizer
 }
 
 
-# endregion
+#endregion

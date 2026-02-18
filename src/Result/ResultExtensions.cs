@@ -34,6 +34,6 @@ namespace Svan.Monads
         /// <returns>The success values merged into a result using a tuple</returns>
         public static Result<TError, Tuple<TFirst, TSecond, TThird, TFourth, TFifth>> Merge<TError, TFirst, TSecond, TThird, TFourth, TFifth>(
             this Result<TError, Tuple<TFirst, TSecond, TThird, TFourth>> group, Result<TError, TFifth> other) =>
-                group.Zip(other, (g, o) => new Tuple<TFirst, TSecond, TThird, TFourth, TFifth>(g.Item1, g.Item2, g.Item3,g.Item4, o));
+                group.Zip(other, (g, o) => new Tuple<TFirst, TSecond, TThird, TFourth, TFifth>(g.Item1, g.Item2, g.Item3, g.Item4, o));
     }
 }

@@ -127,7 +127,7 @@ public class OptionTests
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
             .AssertSome(5);
-        
+
         Option<int>.Some(4)
             .Filter(i => i > 0)
             .Filter(i => i % 2 > 0)
@@ -264,13 +264,13 @@ public class OptionTests
 
         Assert.Equal("hello", result.ErrorValue().Message);
     }
-        
+
     [Fact]
     public void OrThrow_throws_A_null_reference_exception()
     {
         var optionNone = Option<int>.None();
         Assert.Throws<NullReferenceException>(() => optionNone.OrThrow());
-            
+
         var optionSome = Option<int>.Some(1);
         Assert.Equal(1, optionSome.OrThrow());
     }

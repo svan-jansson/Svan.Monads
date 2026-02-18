@@ -14,14 +14,14 @@ namespace Svan.Monads
             this Try<Task<TSuccess>> tryTask)
         {
             if (tryTask.IsError())
-                return tryTask.ErrorValue();
+                return Try.Exception<TSuccess>(tryTask.ErrorValue());
             try
             {
-                return await tryTask.SuccessValue().ConfigureAwait(false);
+                return Try.Success(await tryTask.SuccessValue().ConfigureAwait(false));
             }
             catch (Exception ex)
             {
-                return ex;
+                return Try.Exception<TSuccess>(ex);
             }
         }
 
@@ -38,7 +38,7 @@ namespace Svan.Monads
             var result = await tryTask.ConfigureAwait(false);
             if (result.IsSuccess())
                 return await binder(result.SuccessValue()).ConfigureAwait(false);
-            return result.ErrorValue();
+            return Try.Exception<TOut>(result.ErrorValue());
         }
 
         /// <summary>
@@ -52,9 +52,7 @@ namespace Svan.Monads
             Func<TSuccess, Task<TOut>> mapper)
         {
             var result = await tryTask.ConfigureAwait(false);
-            if (result.IsSuccess())
-                return await mapper(result.SuccessValue()).ConfigureAwait(false);
-            return result.ErrorValue();
+            return result.IsSuccess() ? Try.Success(await mapper(result.SuccessValue()).ConfigureAwait(false)) : Try.Exception<TOut>(result.ErrorValue());
         }
 
         /// <summary>
@@ -67,18 +65,15 @@ namespace Svan.Monads
             Func<TSuccess, Task<Try<TOut>>> binder)
         {
             var result = await tryTask.ConfigureAwait(false);
-            if (result.IsSuccess())
+            if (!result.IsSuccess()) return Try.Exception<TOut>(result.ErrorValue());
+            try
             {
-                try
-                {
-                    return await binder(result.SuccessValue()).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    return ex;
-                }
+                return await binder(result.SuccessValue()).ConfigureAwait(false);
             }
-            return result.ErrorValue();
+            catch (Exception ex)
+            {
+                return Try.Exception<TOut>(ex);
+            }
         }
 
         /// <summary>
@@ -91,18 +86,16 @@ namespace Svan.Monads
             Func<TSuccess, Task<TOut>> mapper)
         {
             var result = await tryTask.ConfigureAwait(false);
-            if (result.IsSuccess())
+            if (!result.IsSuccess()) return Try.Exception<TOut>(result.ErrorValue());
+
+            try
             {
-                try
-                {
-                    return await mapper(result.SuccessValue()).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    return ex;
-                }
+                return Try.Success(await mapper(result.SuccessValue()).ConfigureAwait(false));
             }
-            return result.ErrorValue();
+            catch (Exception ex)
+            {
+                return Try.Exception<TOut>(ex);
+            }
         }
     }
 }

@@ -7,14 +7,11 @@ namespace Svan.Monads
     /// </summary>
     public class Result<TError, TSuccess> : Union<TError, TSuccess>
     {
-        public Result(TError value) : base(new Left<TError>(value)) { }
-        public Result(TSuccess value) : base(new Right<TSuccess>(value)) { }
+        internal Result(Left<TError> value) : base(value) { }
+        internal Result(Right<TSuccess> value) : base(value) { }
 
-        public static implicit operator Result<TError, TSuccess>(TSuccess value) => new (value);
-        public static implicit operator Result<TError, TSuccess>(TError value) => new (value);
-
-        public static Result<TError, TSuccess> Error(TError value) => new (value);
-        public static Result<TError, TSuccess> Success(TSuccess value) => new (value);
+        public static Result<TError, TSuccess> Error(TError value) => new(new Left<TError>(value));
+        public static Result<TError, TSuccess> Success(TSuccess value) => new(new Right<TSuccess>(value));
 
         /// <summary>
         /// Returns <c>true</c> if the result is in the error state.
@@ -54,7 +51,7 @@ namespace Svan.Monads
         /// Recover from <c>TError</c> by providing a <c>TSuccess</c> or a new error <c>TOut</c>.
         /// </summary>
         public Result<TOut, TSuccess> Recover<TOut>(Func<TError, Result<TOut, TSuccess>> recover)
-            => Match(recover, success => success);
+            => BindError(recover);
 
         /// <summary>
         /// Map the success value to a new type using a mapping function.
@@ -136,7 +133,7 @@ namespace Svan.Monads
             if (other.IsError())
                 return Result<TError, TSuccessOut>.Error(other.ErrorValue());
 
-            return combine(SuccessValue(), other.SuccessValue());
+            return Result<TError, TSuccessOut>.Success(combine(SuccessValue(), other.SuccessValue()));
         }
 
         /// <summary>
@@ -154,7 +151,7 @@ namespace Svan.Monads
             if (secondOther.IsError())
                 return Result<TError, TSuccessOut>.Error(secondOther.ErrorValue());
 
-            return combine(SuccessValue(), firstOther.SuccessValue(), secondOther.SuccessValue());
+            return Result<TError, TSuccessOut>.Success(combine(SuccessValue(), firstOther.SuccessValue(), secondOther.SuccessValue()));
         }
 
         /// <summary>
@@ -175,11 +172,11 @@ namespace Svan.Monads
             if (thirdOther.IsError())
                 return Result<TError, TSuccessOut>.Error(thirdOther.ErrorValue());
 
-            return combine(
+            return Result<TError, TSuccessOut>.Success(combine(
                 SuccessValue(),
                 firstOther.SuccessValue(),
                 secondOther.SuccessValue(),
-                thirdOther.SuccessValue());
+                thirdOther.SuccessValue()));
         }
 
         /// <summary>
@@ -214,12 +211,12 @@ namespace Svan.Monads
             if (fourthOther.IsError())
                 return Result<TError, TSuccessOut>.Error(fourthOther.ErrorValue());
 
-            return combine(
+            return Result<TError, TSuccessOut>.Success(combine(
                 SuccessValue(),
                 firstOther.SuccessValue(),
                 secondOther.SuccessValue(),
                 thirdOther.SuccessValue(),
-                fourthOther.SuccessValue());
+                fourthOther.SuccessValue()));
         }
 
         /// <summary>

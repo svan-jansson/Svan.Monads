@@ -5,29 +5,6 @@ namespace Svan.Monads
     public static class OptionExtensions
     {
         /// <summary>
-        /// Converts any type <c>T</c> to <c>Option&lt;T&gt;</c>. 
-        /// </summary>
-        /// <returns>Returns <c>Some&lt;T&gt;</c> for value types.
-        /// Returns <c>Some&lt;T&gt;</c> for reference types that are not <c>null</c> and <c>None</c> for reference types that are <c>null</c>.</returns>
-        public static Option<T> ToOption<T>(this T value)
-        {
-            Option<T> result;
-
-            if (typeof(T).IsValueType)
-            {
-                result = Option<T>.Some(value);
-            }
-            else
-            {
-                result = value == null
-                    ? Option<T>.None()
-                    : Option<T>.Some(value);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Merge two or more options together. Merge will only be performed if all involved options resolve to Some.
         /// </summary>
         /// <returns>The values merged into an option of a tuple</returns>

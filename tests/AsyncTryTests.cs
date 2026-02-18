@@ -100,7 +100,7 @@ namespace Svan.Monads.UnitTests
 
             Assert.Equal("computed: 10", message);
         }
- 
+
         [Fact]
         public async Task Sequence_enables_sync_map_with_async_function()
         {

@@ -69,7 +69,7 @@ namespace Svan.Monads.UnitTests
         public void BindCatching_propagates_error_from_binder_result()
         {
             var result = Try.Catching(() => 42)
-                .BindCatching<string>(n => new Exception("binder returned error"));
+                .BindCatching<string>(n => Try.Exception<string>(new Exception("binder returned error")));
 
             Assert.Equal("binder returned error", result.ErrorValue().Message);
         }

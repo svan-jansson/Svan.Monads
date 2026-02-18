@@ -26,7 +26,7 @@ namespace Svan.Monads.UnitTests
                 .Bind(result => Divide(result, 2))
                 .Map(result => result * 2)
                 .AssertSuccess(expectedSuccess);
-            
+
             Divide(12, 0)
                 .Bind(result => Divide(result, 2))
                 .Map(result => result * 2)
@@ -68,7 +68,7 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Use_Do_to_execute_conditional_actions()
         {
-            Result<Exception, int> result = 5;
+            var result = Result<Exception, int>.Success(5);
 
             result
                 .DoIfError(_ => Assert.Fail("this should not be executed"))
@@ -78,7 +78,7 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Use_DoIfError_to_execute_conditional_actions()
         {
-            Result<Exception, int> result = new Exception("this is an error");
+            var result = Result<Exception, int>.Error(new Exception("this is an error"));
 
             result
                 .DoIfError(error => Assert.Equal("this is an error", error.Message))
@@ -88,17 +88,17 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Result_can_be_downcasted_to_option()
         {
-            Result<Exception, int> result = new Exception("this is an error");
+            var result = Result<Exception, int>.Error(new Exception("this is an error"));
             result.ToOption().AssertNone();
 
-            result = 5;
+            result = Result<Exception, int>.Success(5);
             result.ToOption().AssertSome(5);
         }
 
         [Fact]
         public void Result_can_be_folded_into_a_single_value()
         {
-            Result<Exception, int> result = 5;
+            var result = Result<Exception, int>.Success(5);
 
             var actual = result
                 .Fold(
@@ -111,8 +111,8 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Combine_results_with_zip_all_are_success()
         {
-            Result<Exception, int> result1 = 5;
-            Result<Exception, int> result2 = 8;
+            var result1 = Result<Exception, int>.Success(5);
+            var result2 = Result<Exception, int>.Success(8);
             var expected = 13;
 
             var actual = result1
@@ -125,8 +125,8 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Combine_results_with_zip_when_errors_exist()
         {
-            Result<Exception, int> result1 = 5;
-            Result<Exception, int> result2 = new Exception("an error");
+            var result1 = Result<Exception, int>.Success(5);
+            var result2 = Result<Exception, int>.Error(new Exception("an error"));
             var expected = "this should happen";
 
             var actual = result1
@@ -139,11 +139,11 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Combine_five_results_with_zip_all_are_success()
         {
-            Result<Exception, int> result1 = 1;
-            Result<Exception, int> result2 = 2;
-            Result<Exception, int> result3 = 3;
-            Result<Exception, int> result4 = 4;
-            Result<Exception, int> result5 = 5;
+            var result1 = Result<Exception, int>.Success(1);
+            var result2 = Result<Exception, int>.Success(2);
+            var result3 = Result<Exception, int>.Success(3);
+            var result4 = Result<Exception, int>.Success(4);
+            var result5 = Result<Exception, int>.Success(5);
 
             var expected = 1 + 2 + 3 + 4 + 5;
 
@@ -163,11 +163,11 @@ namespace Svan.Monads.UnitTests
         [Fact]
         public void Zip_returns_the_first_encountered_error()
         {
-            Result<string, int> result1 = 1;
-            Result<string, int> result2 = "first error";
-            Result<string, int> result3 = 3;
-            Result<string, int> result4 = "second error";
-            Result<string, int> result5 = 5;
+            var result1 = Result<string, int>.Success(1);
+            var result2 = Result<string, int>.Error("first error");
+            var result3 = Result<string, int>.Success(3);
+            var result4 = Result<string, int>.Error("second error");
+            var result5 = Result<string, int>.Success(5);
 
             var expected = "first error";
 
@@ -204,7 +204,7 @@ namespace Svan.Monads.UnitTests
         {
             var resultError = Result<int, int>.Error(0);
             Assert.Throws<InvalidOperationException>(() => resultError.OrThrow());
-            
+
             var resultSuccess = Result<int, int>.Success(1);
             Assert.Equal(1, resultSuccess.OrThrow());
         }
@@ -215,9 +215,9 @@ namespace Svan.Monads.UnitTests
             var actualRecoverSuccess = resultError
                 .Recover((error) => Result<string, int>.Success(error + 1))
                 .OrThrow();
-            
+
             Assert.Equal(1, actualRecoverSuccess);
-            
+
             var actualRecoverError = resultError
                 .Recover((error) => Result<string, int>.Error("error"));
             Assert.Equal("error", actualRecoverError.ErrorValue());

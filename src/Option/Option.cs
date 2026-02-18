@@ -7,9 +7,10 @@ namespace Svan.Monads
     /// </summary>
     public class Option<T> : Union<None, T>
     {
-        public Option(None value) : base(new Left<None>(value)) { }
-        public Option(T value) : base(new Right<T>(value)) { }
-        public static implicit operator Option<T>(None _) => new (_);
+        internal Option(None value) : base(new Left<None>(value)) { }
+        internal Option(T value) : base(new Right<T>(value)) { }
+
+        public static implicit operator Option<T>(None _) => new(_);
         public static implicit operator Option<T>(T _) => Some(_);
 
         public static Option<T> None() => new None();
@@ -114,7 +115,7 @@ namespace Svan.Monads
             => Match(
                 _ => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
                 value => value);
-        
+
         /// <summary>
         /// Combine several options into a new option or <c>None</c> if any of the provided options are <c>None</c>
         /// </summary>
@@ -200,9 +201,9 @@ namespace Svan.Monads
         /// </summary>
 
         public Result<TError, T> ToResult<TError>(Func<TError> defaultError)
-         => Fold<Result<TError, T>>(
-                () => defaultError(),
-                (value) => value
+         => Fold(
+                () => Result<TError, T>.Error(defaultError()),
+                Result<TError, T>.Success
             );
     }
 }
