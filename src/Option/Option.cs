@@ -10,10 +10,7 @@ namespace Svan.Monads
         internal Option(None value) : base(new Left<None>(value)) { }
         internal Option(T value) : base(new Right<T>(value)) { }
 
-        public static implicit operator Option<T>(None _) => new(_);
-        public static implicit operator Option<T>(T _) => Some(_);
-
-        public static Option<T> None() => new None();
+        public static Option<T> None() => new(new None());
         public static Option<T> Some(T value) => new(value);
 
         /// <summary>
@@ -38,7 +35,7 @@ namespace Svan.Monads
         /// <returns>An option of the output type of the binder. </returns>
         public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
             => Match(
-                none => none,
+                _ => Option<TOut>.None(),
                 binder);
 
         /// <summary>
@@ -59,8 +56,8 @@ namespace Svan.Monads
         /// <returns><c>Some</c> when filter returns true. <c>None</c> when filter returns false or current state of option is <c>None</c></returns>
         public Option<T> Filter(Func<T, bool> filter)
             => Match(
-                none => none,
-                value => filter(value) ? value : None());
+                _ => None(),
+                value => filter(value) ? Some(value) : None());
 
         /// <summary>
         /// Do lets you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
@@ -123,7 +120,7 @@ namespace Svan.Monads
         {
             if (IsSome() && other.IsSome())
             {
-                return combine(Value(), other.Value());
+                return Option<TOut>.Some(combine(Value(), other.Value()));
             }
 
             return Option<TOut>.None();
@@ -139,7 +136,7 @@ namespace Svan.Monads
         {
             if (IsSome() && firstOther.IsSome() && secondOther.IsSome())
             {
-                return combine(Value(), firstOther.Value(), secondOther.Value());
+                return Option<TOut>.Some(combine(Value(), firstOther.Value(), secondOther.Value()));
             }
 
             return Option<TOut>.None();
@@ -159,11 +156,11 @@ namespace Svan.Monads
                 && secondOther.IsSome()
                 && thirdOther.IsSome())
             {
-                return combine(
+                return Option<TOut>.Some(combine(
                     Value(),
                     firstOther.Value(),
                     secondOther.Value(),
-                    thirdOther.Value());
+                    thirdOther.Value()));
             }
 
             return Option<TOut>.None();
@@ -185,12 +182,12 @@ namespace Svan.Monads
                 && thirdOther.IsSome()
                 && fourthOther.IsSome())
             {
-                return combine(
+                return Option<TOut>.Some(combine(
                     Value(),
                     firstOther.Value(),
                     secondOther.Value(),
                     thirdOther.Value(),
-                    fourthOther.Value());
+                    fourthOther.Value()));
             }
 
             return Option<TOut>.None();

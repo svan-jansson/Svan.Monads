@@ -7,26 +7,12 @@ public class OptionTests
 {
     private Option<int> IsGreaterThan10(int i)
     {
-        if (i > 10)
-        {
-            return i;
-        }
-        else
-        {
-            return new None();
-        }
+        return i > 10 ? Option.Some(i) : Option.None<int>();
     }
 
     private Option<int> IsEven(int i)
     {
-        if (i % 2 == 0)
-        {
-            return i;
-        }
-        else
-        {
-            return new None();
-        }
+        return i % 2 == 0 ? Option.Some(i) : Option.None<int>();
     }
 
     [Theory]
@@ -35,7 +21,7 @@ public class OptionTests
     public void Conditional_execution_when_contract_is_fulfilled(int evenNumber)
     {
         var expected = evenNumber;
-        Option<int> option = evenNumber;
+        var option = evenNumber.ToOption();
 
         var actual = option
             .Bind(IsGreaterThan10)
@@ -52,7 +38,7 @@ public class OptionTests
     [InlineData(1, "below or equal to two")]
     public void Bind_to_different_data_type(int value, string expected)
     {
-        Option<int> option = value;
+        var option = value.ToOption();
 
         var actual = option
             .Bind(i => i > 2
@@ -72,7 +58,7 @@ public class OptionTests
     public void Conditional_execution_when_contract_is_not_fulfilled(int oddNumber)
     {
         var expected = 0;
-        Option<int> option = oddNumber;
+        var option = oddNumber.ToOption();
 
         var actual = option
             .Bind(IsGreaterThan10)
@@ -88,7 +74,7 @@ public class OptionTests
     public void Convert_to_option_type_using_map()
     {
         var expected = "~20~";
-        Option<int> option = 20;
+        var option = 20.ToOption();
 
         var actual = option
             .Bind(IsGreaterThan10)
@@ -106,7 +92,7 @@ public class OptionTests
     public void Pipeline_does_not_break_on_None()
     {
         var expected = "could not convert number";
-        Option<int> option = 19;
+        var option = 19.ToOption();
 
         var actual = option
             .Bind(IsGreaterThan10)
@@ -137,7 +123,7 @@ public class OptionTests
     [Fact]
     public void Use_Do_to_execute_conditional_actions()
     {
-        Option<int> option = 5;
+        var option = 5.ToOption();
 
         option
             .DoIfNone(() => Assert.Fail("this should not be executed"))
@@ -147,7 +133,7 @@ public class OptionTests
     [Fact]
     public void Use_DoIfNone_to_execute_conditional_actions()
     {
-        Option<int> option = new None();
+        var option = Option.None<int>();
 
         option
             .Do(i => Assert.Fail("this should not be executed"))

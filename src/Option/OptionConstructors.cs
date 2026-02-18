@@ -10,7 +10,7 @@ public static class Option
     /// <summary>
     /// Creates a <c>None</c> option of type <c>T</c>.
     /// </summary>
-    public static Option<T> None<T>() => new None();
+    public static Option<T> None<T>() => new(new None());
 
     /// <summary>
     /// Converts any type <c>T</c> to <c>Option&lt;T&gt;</c>. 
