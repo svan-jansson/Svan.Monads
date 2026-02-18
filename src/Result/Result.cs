@@ -7,8 +7,8 @@ namespace Svan.Monads
     /// </summary>
     public class Result<TError, TSuccess> : Union<TError, TSuccess>
     {
-        public Result(TError value) : base(value) { }
-        public Result(TSuccess value) : base(value) { }
+        public Result(TError value) : base(new Left<TError>(value)) { }
+        public Result(TSuccess value) : base(new Right<TSuccess>(value)) { }
 
         public static implicit operator Result<TError, TSuccess>(TSuccess value) => new (value);
         public static implicit operator Result<TError, TSuccess>(TError value) => new (value);

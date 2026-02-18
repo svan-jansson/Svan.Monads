@@ -3,18 +3,17 @@
 namespace Svan.Monads
 {
     /// <summary>
-    /// Union of <c>None</c> and <c>Some&lt;T&gt;</c> with monad features for the Maybe flow control
+    /// Union of <c>None</c> and <c>T</c> with monad features for the Maybe flow control
     /// </summary>
-    public class Option<T> : Union<None, Some<T>>
+    public class Option<T> : Union<None, T>
     {
-        public Option(None value) : base(value) { }
-        public Option(Some<T> value) : base(value) { }
+        public Option(None value) : base(new Left<None>(value)) { }
+        public Option(T value) : base(new Right<T>(value)) { }
         public static implicit operator Option<T>(None _) => new (_);
-        public static implicit operator Option<T>(Some<T> _) => new (_);
         public static implicit operator Option<T>(T _) => Some(_);
 
         public static Option<T> None() => new None();
-        public static Option<T> Some(T value) => new Some<T>(value);
+        public static Option<T> Some(T value) => new(value);
 
         /// <summary>
         /// Returns <c>true</c> if the option is <c>None</c>.
@@ -29,7 +28,7 @@ namespace Svan.Monads
         /// <summary>
         /// Returns the current value. Will throw <c>NullReferenceException</c> if current option state is None.
         /// </summary>
-        public T Value() => IsSome() ? AsRight.Value : throw new NullReferenceException();
+        public T Value() => IsSome() ? AsRight : throw new NullReferenceException();
 
         /// <summary>
         /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.
@@ -39,7 +38,7 @@ namespace Svan.Monads
         public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> binder)
             => Match(
                 none => none,
-                some => binder(some.Value));
+                binder);
 
         /// <summary>
         /// Map the value of the option to an <c>Option&lt;TOut&gt;</c> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
@@ -50,7 +49,7 @@ namespace Svan.Monads
         public Option<TOut> Map<TOut>(Func<T, TOut> mapping)
             => Match(
                 _ => Option<TOut>.None(),
-                some => Option<TOut>.Some(mapping(some.Value)));
+                value => Option<TOut>.Some(mapping(value)));
 
         /// <summary>
         /// Filter the value using a filter function. The filter function will not be executed if the current state of the option is <c>None</c>.
@@ -60,7 +59,7 @@ namespace Svan.Monads
         public Option<T> Filter(Func<T, bool> filter)
             => Match(
                 none => none,
-                some => filter(some.Value) ? some : None());
+                value => filter(value) ? value : None());
 
         /// <summary>
         /// Do lets you fire and forget an action that is executed only when the value is <c>Some&lt;T&gt;</c>
@@ -98,7 +97,7 @@ namespace Svan.Monads
         public TOut Fold<TOut>(Func<TOut> caseNone, Func<T, TOut> caseSome)
             => Match(
                 _ => caseNone(),
-                some => caseSome(some.Value));
+                caseSome);
 
         /// <summary>
         /// Get the value of <c>Some</c> or a default value from the supplied function.
@@ -106,15 +105,15 @@ namespace Svan.Monads
         public T DefaultWith(Func<T> defaultNone)
             => Match(
                 _ => defaultNone(),
-                some => some.Value);
-        
+                value => value);
+
         /// <summary>
         /// Get the value of <c>Some</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
         public T OrThrow()
             => Match(
                 _ => throw new NullReferenceException($"Expected some {typeof(T).Name} but was none."),
-                some => some.Value);
+                value => value);
         
         /// <summary>
         /// Combine several options into a new option or <c>None</c> if any of the provided options are <c>None</c>
