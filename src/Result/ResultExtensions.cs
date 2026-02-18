@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Svan.Monads
 {
@@ -35,5 +36,33 @@ namespace Svan.Monads
         public static Result<TError, Tuple<TFirst, TSecond, TThird, TFourth, TFifth>> Merge<TError, TFirst, TSecond, TThird, TFourth, TFifth>(
             this Result<TError, Tuple<TFirst, TSecond, TThird, TFourth>> group, Result<TError, TFifth> other) =>
                 group.Zip(other, (g, o) => new Tuple<TFirst, TSecond, TThird, TFourth, TFifth>(g.Item1, g.Item2, g.Item3, g.Item4, o));
+
+        /// <summary>
+        /// Combine a sequence of results together. Returns <c>Success</c> with all values if every result is <c>Success</c>,
+        /// or the first <c>Error</c> encountered.
+        /// </summary>
+        public static Result<TError, IEnumerable<TSuccess>> Sequence<TError, TSuccess>(this IEnumerable<Result<TError, TSuccess>> results)
+        {
+            var values = new List<TSuccess>();
+
+            foreach (var result in results)
+            {
+                if (result.IsError())
+                {
+                    return Result<TError, IEnumerable<TSuccess>>.Error(result.ErrorValue());
+                }
+
+                values.Add(result.SuccessValue());
+            }
+
+            return Result<TError, IEnumerable<TSuccess>>.Success(values);
+        }
+
+        /// <summary>
+        /// Flattens a nested <c>Result&lt;TError, Result&lt;TError, TSuccess&gt;&gt;</c> into a <c>Result&lt;TError, TSuccess&gt;</c>.
+        /// Returns the inner result when <c>Success</c>, or propagates the outer error when <c>Error</c>.
+        /// </summary>
+        public static Result<TError, TSuccess> Flatten<TError, TSuccess>(this Result<TError, Result<TError, TSuccess>> result)
+            => result.DefaultWith(Result<TError, TSuccess>.Error);
     }
 }

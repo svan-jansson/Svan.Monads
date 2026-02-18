@@ -222,5 +222,65 @@ namespace Svan.Monads.UnitTests
                 .Recover((error) => Result<string, int>.Error("error"));
             Assert.Equal("error", actualRecoverError.ErrorValue());
         }
+
+        [Fact]
+        public void Flatten_returns_inner_result_when_success()
+        {
+            var nested = Result<string, Result<string, int>>.Success(Result<string, int>.Success(42));
+            nested.Flatten().AssertSuccess(42);
+        }
+
+        [Fact]
+        public void Flatten_returns_inner_error_when_inner_is_error()
+        {
+            var nested = Result<string, Result<string, int>>.Success(Result<string, int>.Error("inner error"));
+            nested.Flatten().AssertError("inner error");
+        }
+
+        [Fact]
+        public void Flatten_returns_outer_error_when_outer_is_error()
+        {
+            var nested = Result<string, Result<string, int>>.Error("outer error");
+            nested.Flatten().AssertError("outer error");
+        }
+
+        [Fact]
+        public void Sequence_returns_all_values_when_all_are_success()
+        {
+            var results = new[]
+            {
+                Result<string, int>.Success(1),
+                Result<string, int>.Success(2),
+                Result<string, int>.Success(3),
+            };
+
+            var sequenced = results.Sequence();
+            Assert.True(sequenced.IsSuccess());
+            Assert.Equal(new[] { 1, 2, 3 }, sequenced.SuccessValue());
+        }
+
+        [Fact]
+        public void Sequence_returns_first_error_when_any_is_error()
+        {
+            var results = new[]
+            {
+                Result<string, int>.Success(1),
+                Result<string, int>.Error("first error"),
+                Result<string, int>.Error("second error"),
+            };
+
+            var sequenced = results.Sequence();
+            sequenced.AssertError("first error");
+        }
+
+        [Fact]
+        public void Sequence_returns_success_with_empty_list_when_empty()
+        {
+            var results = Array.Empty<Result<string, int>>();
+
+            var sequenced = results.Sequence();
+            Assert.True(sequenced.IsSuccess());
+            Assert.Empty(sequenced.SuccessValue());
+        }
     }
 }

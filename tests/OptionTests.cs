@@ -261,6 +261,27 @@ public class OptionTests
         Assert.Equal(1, optionSome.OrThrow());
     }
 
+    [Fact]
+    public void Flatten_returns_inner_option_when_some()
+    {
+        var nested = Option<Option<int>>.Some(Option<int>.Some(42));
+        nested.Flatten().AssertSome(42);
+    }
+
+    [Fact]
+    public void Flatten_returns_none_when_inner_is_none()
+    {
+        var nested = Option<Option<int>>.Some(Option<int>.None());
+        nested.Flatten().AssertNone();
+    }
+
+    [Fact]
+    public void Flatten_returns_none_when_outer_is_none()
+    {
+        var nested = Option<Option<int>>.None();
+        nested.Flatten().AssertNone();
+    }
+
     class TestClass
     {
 

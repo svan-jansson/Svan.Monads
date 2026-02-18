@@ -74,6 +74,72 @@ namespace Svan.Monads.UnitTests
             Assert.Equal("binder returned error", result.ErrorValue().Message);
         }
 
+        [Fact]
+        public void Flatten_returns_inner_try_when_success()
+        {
+            var nested = Try<Try<int>>.Success(Try<int>.Success(42));
+            nested.Flatten().AssertSuccess(42);
+        }
+
+        [Fact]
+        public void Flatten_returns_inner_exception_when_inner_is_error()
+        {
+            var inner = Try<int>.Exception(new Exception("inner error"));
+            var nested = Try<Try<int>>.Success(inner);
+            var result = nested.Flatten();
+            Assert.True(result.IsError());
+            Assert.Equal("inner error", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public void Flatten_returns_outer_exception_when_outer_is_error()
+        {
+            var nested = Try<Try<int>>.Exception(new Exception("outer error"));
+            var result = nested.Flatten();
+            Assert.True(result.IsError());
+            Assert.Equal("outer error", result.ErrorValue().Message);
+        }
+
+        [Fact]
+        public void Sequence_returns_all_values_when_all_are_success()
+        {
+            var tries = new[]
+            {
+                Try<int>.Success(1),
+                Try<int>.Success(2),
+                Try<int>.Success(3),
+            };
+
+            var sequenced = tries.Sequence();
+            Assert.True(sequenced.IsSuccess());
+            Assert.Equal(new[] { 1, 2, 3 }, sequenced.SuccessValue());
+        }
+
+        [Fact]
+        public void Sequence_returns_first_exception_when_any_is_error()
+        {
+            var tries = new[]
+            {
+                Try<int>.Success(1),
+                Try<int>.Exception(new Exception("first error")),
+                Try<int>.Exception(new Exception("second error")),
+            };
+
+            var sequenced = tries.Sequence();
+            Assert.True(sequenced.IsError());
+            Assert.Equal("first error", sequenced.ErrorValue().Message);
+        }
+
+        [Fact]
+        public void Sequence_returns_success_with_empty_list_when_empty()
+        {
+            var tries = System.Array.Empty<Try<int>>();
+
+            var sequenced = tries.Sequence();
+            Assert.True(sequenced.IsSuccess());
+            Assert.Empty(sequenced.SuccessValue());
+        }
+
         class ErrorThatIsNotAnExceptionType { }
     }
 }
