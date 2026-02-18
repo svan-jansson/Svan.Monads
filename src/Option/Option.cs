@@ -26,7 +26,7 @@ namespace Svan.Monads
         /// <summary>
         /// Returns the current value. Will throw <c>NullReferenceException</c> if current option state is None.
         /// </summary>
-        public T Value() => IsSome() ? AsRight : throw new NullReferenceException();
+        public T Value() => IsSome() ? AsRight : throw new NullReferenceException($"Expected some {typeof(T).Name} but was none.");
 
         /// <summary>
         /// Bind the <c>Option&lt;T&gt;</c> to an <c>Option&lt;TOut&gt;</c> using a binder function. The binder function will not be executed if the current state of the option is <c>None</c>.

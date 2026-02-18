@@ -1,2 +1,2 @@
 [tools]
-dotnet = "latest"
+dotnet = "9"

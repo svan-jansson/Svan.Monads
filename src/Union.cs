@@ -17,30 +17,38 @@ namespace Svan.Monads
     /// </summary>
     public class Union<TLeft, TRight>
     {
-        private readonly object _value;
+        private readonly bool _isLeft;
+        private readonly TLeft _left;
+        private readonly TRight _right;
 
-        protected Union(Left<TLeft> value) { _value = value; }
-        protected Union(Right<TRight> value) { _value = value; }
+        protected Union(Left<TLeft> value)
+        {
+            _isLeft = true;
+            _left = value.Value;
+            _right = default!;
+        }
 
-        internal bool IsLeft => _value is Left<TLeft>;
+        protected Union(Right<TRight> value)
+        {
+            _isLeft = false;
+            _left = default!;
+            _right = value.Value;
+        }
 
-        internal bool IsRight => _value is Right<TRight>;
+        internal bool IsLeft => _isLeft;
 
-        internal TLeft AsLeft => _value is Left<TLeft> left
-            ? left.Value
+        internal bool IsRight => !_isLeft;
+
+        internal TLeft AsLeft => _isLeft
+            ? _left
             : throw new NullReferenceException("Cannot access Left when value is Right.");
 
-        internal TRight AsRight => _value is Right<TRight> right
-            ? right.Value
+        internal TRight AsRight => !_isLeft
+            ? _right
             : throw new NullReferenceException("Cannot access Right when value is Left.");
 
         internal TOut Match<TOut>(Func<TLeft, TOut> f0, Func<TRight, TOut> f1)
-            => _value switch
-            {
-                Left<TLeft> left => f0(left.Value),
-                Right<TRight> right => f1(right.Value),
-                _ => throw new InvalidOperationException("Union is in an invalid state.")
-            };
+            => _isLeft ? f0(_left) : f1(_right);
 
         public static implicit operator Union<TLeft, TRight>(Left<TLeft> value) => new(value);
         public static implicit operator Union<TLeft, TRight>(Right<TRight> value) => new(value);
