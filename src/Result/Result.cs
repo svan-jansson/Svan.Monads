@@ -3,7 +3,7 @@ using System;
 namespace Svan.Monads
 {
     /// <summary>
-    /// Union of <c>TError</c> and <c>TSuccess</c> with monad features for railway-oriented error handling.
+    /// Union of <typeparamref name="TError"/> and <typeparamref name="TSuccess"/> with monad features for railway-oriented error handling.
     /// </summary>
     /// <example>
     /// <code>
@@ -22,9 +22,9 @@ namespace Svan.Monads
         internal Result(Left<TError> value) : base(value) { }
         internal Result(Right<TSuccess> value) : base(value) { }
 
-        /// <summary>Creates an <c>Error</c> result with <paramref name="value"/>.</summary>
+        /// <summary>Creates a <typeparamref name="TError"/> result with <paramref name="value"/>.</summary>
         public static Result<TError, TSuccess> Error(TError value) => new(new Left<TError>(value));
-        /// <summary>Creates a <c>Success</c> result with <paramref name="value"/>.</summary>
+        /// <summary>Creates a <typeparamref name="TSuccess"/> result with <paramref name="value"/>.</summary>
         public static Result<TError, TSuccess> Success(TSuccess value) => new(new Right<TSuccess>(value));
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Svan.Monads
             => Match(binder, Result<TOut, TSuccess>.Success);
 
         /// <summary>
-        /// Recover from <c>TError</c> by providing a <c>TSuccess</c> or a new error <c>TOut</c>.
+        /// Recover from <typeparamref name="TError"/> by providing a <typeparamref name="TSuccess"/> or a new error <typeparamref name="TOut"/>.
         /// </summary>
         /// <example>
         /// <code>
@@ -117,9 +117,9 @@ namespace Svan.Monads
                 Result<TOut, TSuccess>.Success);
 
         /// <summary>
-        /// Do lets you fire and forget an action that is executed only when the value is <see cref="TSuccess"/>
+        /// Do lets you fire and forget an action that is executed only when the value is <typeparamref name="TSuccess"/>
         /// </summary>
-        /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
+        /// <param name="do">An action that takes a single parameter of <typeparamref name="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
         /// <example>
         /// <code>
@@ -138,9 +138,9 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Do lets you fire and forget an action that is executed only when the value is <see cref="TError"/>
+        /// Do lets you fire and forget an action that is executed only when the value is <typeparamref name="TError"/>
         /// </summary>
-        /// <param name="do">An action that takes a single parameter of <see cref="TError"/></param>
+        /// <param name="do">An action that takes a single parameter of <typeparamref name="TError"/></param>
         /// <returns>The current state of the Result</returns>
         public Result<TError, TSuccess> DoIfError(Action<TError> @do)
         {
@@ -153,7 +153,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Get the value of <c>TSuccess</c> or a default value from the supplied function.
+        /// Get the value of <typeparamref name="TSuccess"/> or a default value from the supplied function.
         /// </summary>
         /// <example>
         /// <code>
@@ -165,13 +165,13 @@ namespace Svan.Monads
             => Match(fallback, success => success);
 
         /// <summary>
-        /// Get the value of <c>TSuccess</c> or a default value from the supplied value.
+        /// Get the value of <typeparamref name="TSuccess"/> or a default value from the supplied value.
         /// </summary>
         public TSuccess DefaultWith(TSuccess fallback)
             => Match(_ => fallback, success => success);
 
         /// <summary>
-        /// Get the value of <c>TSuccess</c> or throw a <see cref="NullReferenceException"/>.
+        /// Get the value of <typeparamref name="TSuccess"/> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
         /// <example>
         /// <code>
@@ -185,7 +185,7 @@ namespace Svan.Monads
                 success => success);
 
         /// <summary>
-        /// Fold into value of type <c>TOut</c> with supplied functions for case <c>TError</c> and case <c>TSuccess</c>.
+        /// Fold into value of type <typeparamref name="TOut"/> with supplied functions for case <typeparamref name="TError"/> and case <typeparamref name="TSuccess"/>.
         /// </summary>
         /// <example>
         /// <code>
@@ -197,7 +197,7 @@ namespace Svan.Monads
             => Match(caseError, caseSuccess);
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <typeparamref name="TError"/> if any of the provided results has an error
         /// </summary>
         public Result<TError, TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Result<TError, TSuccessOther> other,
@@ -212,7 +212,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <typeparamref name="TError"/> if any of the provided results has an error
         /// </summary>
         public Result<TError, TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Result<TError, TSuccessFirstOther> firstOther,
@@ -230,7 +230,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <typeparamref name="TError"/> if any of the provided results has an error
         /// </summary>
         public Result<TError, TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
             Result<TError, TSuccessFirstOther> firstOther,
@@ -255,7 +255,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <typeparamref name="TError"/> if any of the provided results has an error
         /// </summary>
         public Result<TError, TSuccessOut> Zip<
             TSuccessOut,

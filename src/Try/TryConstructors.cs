@@ -30,7 +30,7 @@ public static class Try
     }
 
     /// <summary>
-    /// Creates a <c>Success</c> try with the provided value.
+    /// Creates a <typeparamref name="TSuccess"/> try with the provided value.
     /// </summary>
     public static Try<TSuccess> Success<TSuccess>(TSuccess value) => Try<TSuccess>.Success(value);
 
@@ -40,7 +40,7 @@ public static class Try
     public static Try<TSuccess> Exception<TSuccess>(Exception value) => Try<TSuccess>.Exception(value);
 
     /// <summary>
-    /// Creates a <c>Success</c> try with the provided value.
+    /// Creates a <typeparamref name="TSuccess"/> try with the provided value.
     /// </summary>
     public static Try<TSuccess> ToSuccess<TSuccess>(this TSuccess value) => Success(value);
 

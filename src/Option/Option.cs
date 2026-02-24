@@ -61,7 +61,7 @@ namespace Svan.Monads
         /// <summary>
         /// Map the value of the option to an <see cref="Option{T}"/> using a mapping function. The mapping function will not be executed if the current state of the option is <c>None</c>.
         /// </summary>
-        /// <param name="mapping">A function that returns a value of <c>TOut</c></param>
+        /// <param name="mapping">A function that returns a value of <typeparamref name="TOut"/></param>
         /// <typeparam name="TOut"></typeparam>
         /// <returns>An option of the output type of the mapping</returns>
         /// <example>
@@ -128,7 +128,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Fold into value of type <c>TOut</c> with supplied functions for case <c>None</c> and case <c>Some</c>.
+        /// Fold into value of type <typeparamref name="TOut"/> with supplied functions for case <c>None</c> and case <c>Some</c>.
         /// </summary>
         /// <example>
         /// <code>

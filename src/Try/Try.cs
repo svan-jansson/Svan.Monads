@@ -98,9 +98,9 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Do lets you fire and forget an action that is executed only when the value is <see cref="TSuccess"/>
+        /// Do lets you fire and forget an action that is executed only when the value is <typeparamref name="TSuccess"/>
         /// </summary>
-        /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
+        /// <param name="do">An action that takes a single parameter of <typeparamref name="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
         public new Try<TSuccess> Do(Action<TSuccess> @do)
         {
@@ -122,7 +122,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <see cref="Exception"/> if any of the provided results has an error
         /// </summary>
         public Try<TSuccessOut> Zip<TSuccessOut, TSuccessOther>(
             Try<TSuccessOther> other,
@@ -133,7 +133,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <see cref="Exception"/> if any of the provided results has an error
         /// </summary>
         public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther>(
             Try<TSuccessFirstOther> firstOther,
@@ -145,7 +145,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <see cref="Exception"/> if any of the provided results has an error
         /// </summary>
         public Try<TSuccessOut> Zip<TSuccessOut, TSuccessFirstOther, TSuccessSecondOther, TSuccessThirdOther>(
             Try<TSuccessFirstOther> firstOther,
@@ -158,7 +158,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Combine several results into a new result of <c>TSuccessOut</c> or <c>TError</c> if any of the provided results has an error
+        /// Combine several results into a new result of <typeparamref name="TSuccessOut"/> or <see cref="Exception"/> if any of the provided results has an error
         /// </summary>
         public Try<TSuccessOut> Zip<
             TSuccessOut,

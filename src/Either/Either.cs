@@ -162,7 +162,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Fold into a value of type <c>TOut</c> with supplied functions for each case.
+        /// Fold into a value of type <typeparamref name="TOut"/> with supplied functions for each case.
         /// </summary>
         /// <example>
         /// <code>

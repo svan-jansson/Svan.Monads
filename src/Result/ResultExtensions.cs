@@ -7,7 +7,7 @@ namespace Svan.Monads
     public static class ResultExtensions
     {
         /// <summary>
-        /// Merge two or more results together. Merge will only be performed if all involved results resolve to <c>TSuccess</c>.
+        /// Merge two or more results together. Merge will only be performed if all involved results are successful.
         /// </summary>
         /// <returns>The success values merged into a result using a tuple</returns>
         /// <example>
@@ -26,7 +26,7 @@ namespace Svan.Monads
                 first.Zip(second, (f, s) => new Tuple<TFirst, TSecond>(f, s));
 
         /// <summary>
-        /// Merge two or more results together. Merge will only be performed if all involved results resolve to <c>TSuccess</c>.
+        /// Merge two or more results together. Merge will only be performed if all involved results are successful.
         /// </summary>
         /// <returns>The success values merged into a result using a tuple</returns>
         public static Result<TError, Tuple<TFirst, TSecond, TThird>> Merge<TError, TFirst, TSecond, TThird>(
@@ -34,7 +34,7 @@ namespace Svan.Monads
                 group.Zip(other, (g, o) => new Tuple<TFirst, TSecond, TThird>(g.Item1, g.Item2, o));
 
         /// <summary>
-        /// Merge two or more results together. Merge will only be performed if all involved results resolve to <c>TSuccess</c>.
+        /// Merge two or more results together. Merge will only be performed if all involved results are successful.
         /// </summary>
         /// <returns>The success values merged into a result using a tuple</returns>
         public static Result<TError, Tuple<TFirst, TSecond, TThird, TFourth>> Merge<TError, TFirst, TSecond, TThird, TFourth>(
@@ -42,7 +42,7 @@ namespace Svan.Monads
                 group.Zip(other, (g, o) => new Tuple<TFirst, TSecond, TThird, TFourth>(g.Item1, g.Item2, g.Item3, o));
 
         /// <summary>
-        /// Merge two or more results together. Merge will only be performed if all involved results resolve to <c>TSuccess</c>.
+        /// Merge two or more results together. Merge will only be performed if all involved results are successful.
         /// </summary>
         /// <returns>The success values merged into a result using a tuple</returns>
         public static Result<TError, Tuple<TFirst, TSecond, TThird, TFourth, TFifth>> Merge<TError, TFirst, TSecond, TThird, TFourth, TFifth>(
