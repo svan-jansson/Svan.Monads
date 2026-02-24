@@ -1,5 +1,6 @@
 namespace Svan.Monads;
 
+/// <summary>Non-generic factory methods for creating <see cref="Option{T}"/> instances.</summary>
 public static class Option
 {
     /// <summary>
@@ -13,10 +14,18 @@ public static class Option
     public static Option<T> None<T>() => new(new None());
 
     /// <summary>
-    /// Converts any type <c>T</c> to <c>Option&lt;T&gt;</c>. 
+    /// Converts any type <c>T</c> to <see cref="Option{T}"/>.
     /// </summary>
-    /// <returns>Returns <c>Some&lt;T&gt;</c> for value types.
-    /// Returns <c>Some&lt;T&gt;</c> for reference types that are not <c>null</c> and <c>None</c> for reference types that are <c>null</c>.</returns>
+    /// <returns>Returns <c>Some</c> for value types.
+    /// Returns <c>Some</c> for reference types that are not <c>null</c> and <c>None</c> for reference types that are <c>null</c>.</returns>
+    /// <example>
+    /// <code>
+    /// var some = "hello".ToOption();   // Some("hello")
+    /// string? s = null;
+    /// var none = s.ToOption();         // None
+    /// var intSome = 42.ToOption();     // Some(42) — value types are always Some
+    /// </code>
+    /// </example>
     public static Option<T> ToOption<T>(this T value)
     {
         Option<T> result;

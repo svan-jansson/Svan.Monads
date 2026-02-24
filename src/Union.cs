@@ -2,13 +2,17 @@ using System;
 
 namespace Svan.Monads
 {
+    /// <summary>Wrapper that marks a value as the left case of a <see cref="Union{TLeft,TRight}"/>.</summary>
     public readonly struct Left<T>(T value)
     {
+        /// <summary>The wrapped left value.</summary>
         public T Value { get; } = value;
     }
 
+    /// <summary>Wrapper that marks a value as the right case of a <see cref="Union{TLeft,TRight}"/>.</summary>
     public readonly struct Right<T>(T value)
     {
+        /// <summary>The wrapped right value.</summary>
         public T Value { get; } = value;
     }
 

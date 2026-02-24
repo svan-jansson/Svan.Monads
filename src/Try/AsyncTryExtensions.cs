@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 
 namespace Svan.Monads
 {
+    /// <summary>Async extension methods for <see cref="Try{TSuccess}"/> enabling fluent async pipelines.</summary>
     public static class AsyncTryExtensions
     {
         /// <summary>
-        /// Flips a <c>Try&lt;Task&lt;TSuccess&gt;&gt;</c> into a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>.
+        /// Flips a <see cref="Try{TSuccess}"/> of <see cref="Task{TResult}"/> into a <see cref="Task{TResult}"/> of <see cref="Try{TSuccess}"/>.
         /// Awaits the inner task when <c>Success</c>, returns the error immediately when <c>Error</c>.
         /// If the inner task faults, the exception is caught and returned as the error state.
         /// </summary>
@@ -26,7 +27,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Binds an async function over a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>.
+        /// Binds an async function over a <see cref="Task{TResult}"/> of <see cref="Try{TSuccess}"/>.
         /// The binder is only called when the result is <c>Success</c>; otherwise short-circuits with the existing error.
         /// Exceptions thrown by the binder or faulted tasks will propagate as faulted tasks.
         /// Use <see cref="BindCatchingAsync{TSuccess, TOut}"/> to catch exceptions into the error state instead.
@@ -42,7 +43,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Maps an async function over a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>.
+        /// Maps an async function over a <see cref="Task{TResult}"/> of <see cref="Try{TSuccess}"/>.
         /// The mapper is only called when the result is <c>Success</c>; otherwise short-circuits with the existing error.
         /// Exceptions thrown by the mapper or faulted tasks will propagate as faulted tasks.
         /// Use <see cref="MapCatchingAsync{TSuccess, TOut}"/> to catch exceptions into the error state instead.
@@ -56,7 +57,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Binds an async function over a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>, catching any exceptions.
+        /// Binds an async function over a <see cref="Task{TResult}"/> of <see cref="Try{TSuccess}"/>, catching any exceptions.
         /// Exceptions thrown by the binder or faulted tasks are caught and returned as the error state,
         /// keeping the chain inside the monad.
         /// </summary>
@@ -77,7 +78,7 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Maps an async function over a <c>Task&lt;Try&lt;TSuccess&gt;&gt;</c>, catching any exceptions.
+        /// Maps an async function over a <see cref="Task{TResult}"/> of <see cref="Try{TSuccess}"/>, catching any exceptions.
         /// Exceptions thrown by the mapper or faulted tasks are caught and returned as the error state,
         /// keeping the chain inside the monad.
         /// </summary>

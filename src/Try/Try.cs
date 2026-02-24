@@ -3,24 +3,46 @@ using System;
 namespace Svan.Monads
 {
     /// <summary>
-    /// A specialization of <c>Result&lt;Exception, TSuccess&gt;</c> that provides exception-catching operations.
+    /// A specialization of <see cref="Result{TError, TSuccess}"/> that provides exception-catching operations.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var result = Try.Catching(() => int.Parse("42"))
+    ///     .MapCatching(n => n * 2)
+    ///     .DefaultWith(_ => 0);
+    /// // result == 84
+    ///
+    /// var failed = Try.Catching(() => int.Parse("abc"))
+    ///     .MapCatching(n => n * 2)
+    ///     .DefaultWith(_ => 0);
+    /// // failed == 0 (FormatException caught at each step)
+    /// </code>
+    /// </example>
     public class Try<TSuccess> : Result<Exception, TSuccess>
     {
         internal Try(Left<Exception> value) : base(value) { }
         internal Try(Right<TSuccess> value) : base(value) { }
 
+        /// <summary>Creates a <c>Try</c> in the error state wrapping <paramref name="value"/>.</summary>
         public static Try<TSuccess> Exception(Exception value) => new(new Left<Exception>(value));
+        /// <summary>Creates a <c>Try</c> in the success state wrapping <paramref name="value"/>.</summary>
         public new static Try<TSuccess> Success(TSuccess value) => new(new Right<TSuccess>(value));
 
         /// <summary>
-        /// Upcast to <c>Result&lt;Exception, TSuccess&gt;</c>.
+        /// Upcast to <see cref="Result{TError, TSuccess}"/>.
         /// </summary>
         public Result<Exception, TSuccess> ToResult() => this;
 
         /// <summary>
         /// Map the success value using a mapping function, catching any exception thrown by the mapper.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var result = Try.Catching(() => "42").MapCatching(int.Parse); // Success(42)
+        /// var failed = Try.Catching(() => "abc").MapCatching(int.Parse); // Exception(FormatException)
+        /// // Unlike Map, exceptions thrown by the mapper are caught rather than propagated.
+        /// </code>
+        /// </example>
         public Try<TOut> MapCatching<TOut>(Func<TSuccess, TOut> mapper)
             => Fold<Try<TOut>>(
                  Try.Exception<TOut>,
@@ -30,6 +52,18 @@ namespace Svan.Monads
         /// Bind using a binder function, catching any exception thrown by the binder.
         /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// Try&lt;int&gt; ParsePositive(string s)
+        /// {
+        ///     var n = int.Parse(s); // throws if invalid
+        ///     return n > 0 ? Try.Success(n) : throw new ArgumentException("must be positive");
+        /// }
+        ///
+        /// var result = Try.Catching(() => "42").BindCatching(ParsePositive); // Success(42)
+        /// var failed = Try.Catching(() => "abc").BindCatching(ParsePositive); // Exception(FormatException)
+        /// </code>
+        /// </example>
         public Try<TOut> BindCatching<TOut>(Func<TSuccess, Try<TOut>> binder)
         {
             if (!IsSuccess()) return Try.Exception<TOut>(ErrorValue());

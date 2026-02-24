@@ -3,7 +3,7 @@ using System;
 namespace Svan.Monads;
 
 /// <summary>
-/// Factory for creating <c>Try&lt;TSuccess&gt;</c> instances by catching exceptions.
+/// Factory for creating <see cref="Try{TSuccess}"/> instances by catching exceptions.
 /// </summary>
 public static class Try
 {
@@ -11,6 +11,12 @@ public static class Try
     /// Execute <paramref name="codeBlock"/> and return its result as <c>Success</c>.
     /// If the code block throws, the exception is caught and returned as the error state.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var success = Try.Catching(() => int.Parse("42")); // Success(42)
+    /// var failed  = Try.Catching(() => int.Parse("abc")); // Exception(FormatException)
+    /// </code>
+    /// </example>
     public static Try<TSuccess> Catching<TSuccess>(Func<TSuccess> codeBlock)
     {
         try

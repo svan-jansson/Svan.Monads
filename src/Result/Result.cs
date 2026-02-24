@@ -5,12 +5,26 @@ namespace Svan.Monads
     /// <summary>
     /// Union of <c>TError</c> and <c>TSuccess</c> with monad features for railway-oriented error handling.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// Result&lt;string, int&gt; Divide(int a, int b) =>
+    ///     b == 0 ? Result&lt;string, int&gt;.Error("division by zero") : Result&lt;string, int&gt;.Success(a / b);
+    ///
+    /// var result = Divide(10, 2)
+    ///     .Bind(n => Divide(n, 1))
+    ///     .Map(n => n * 3)
+    ///     .DefaultWith(_ => 0);
+    /// // result == 15
+    /// </code>
+    /// </example>
     public class Result<TError, TSuccess> : Union<TError, TSuccess>
     {
         internal Result(Left<TError> value) : base(value) { }
         internal Result(Right<TSuccess> value) : base(value) { }
 
+        /// <summary>Creates an <c>Error</c> result with <paramref name="value"/>.</summary>
         public static Result<TError, TSuccess> Error(TError value) => new(new Left<TError>(value));
+        /// <summary>Creates a <c>Success</c> result with <paramref name="value"/>.</summary>
         public static Result<TError, TSuccess> Success(TSuccess value) => new(new Right<TSuccess>(value));
 
         /// <summary>
@@ -34,14 +48,24 @@ namespace Svan.Monads
         public TSuccess SuccessValue() => IsSuccess() ? AsRight : throw new NullReferenceException();
 
         /// <summary>
-        /// Bind the result to a new <c>Result&lt;TError, TOut&gt;</c> using a binder function.
+        /// Bind the result to a new <see cref="Result{TError, TSuccess}"/> using a binder function.
         /// The binder is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// Result&lt;string, int&gt; Halve(int n) =>
+        ///     n % 2 == 0 ? Result&lt;string, int&gt;.Success(n / 2) : Result&lt;string, int&gt;.Error("odd");
+        ///
+        /// var result  = Result&lt;string, int&gt;.Success(10).Bind(Halve); // Success(5)
+        /// var error   = Result&lt;string, int&gt;.Success(3).Bind(Halve);  // Error("odd")
+        /// var skipped = Result&lt;string, int&gt;.Error("fail").Bind(Halve); // Error("fail") — binder not called
+        /// </code>
+        /// </example>
         public Result<TError, TOut> Bind<TOut>(Func<TSuccess, Result<TError, TOut>> binder)
             => Match(Result<TError, TOut>.Error, binder);
 
         /// <summary>
-        /// Bind the error to a new <c>Result&lt;TOut, TSuccess&gt;</c> using a binder function.
+        /// Bind the error to a new <see cref="Result{TError, TSuccess}"/> using a binder function.
         /// The binder is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
         /// </summary>
         public Result<TOut, TSuccess> BindError<TOut>(Func<TError, Result<TOut, TSuccess>> binder)
@@ -50,6 +74,15 @@ namespace Svan.Monads
         /// <summary>
         /// Recover from <c>TError</c> by providing a <c>TSuccess</c> or a new error <c>TOut</c>.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var recovered = Result&lt;int, int&gt;.Error(0)
+        ///     .Recover(e => Result&lt;string, int&gt;.Success(e + 1)); // Success(1)
+        ///
+        /// var reErrored = Result&lt;int, int&gt;.Error(0)
+        ///     .Recover(e => Result&lt;string, int&gt;.Error("still bad")); // Error("still bad")
+        /// </code>
+        /// </example>
         public Result<TOut, TSuccess> Recover<TOut>(Func<TError, Result<TOut, TSuccess>> recover)
             => BindError(recover);
 
@@ -57,6 +90,12 @@ namespace Svan.Monads
         /// Map the success value to a new type using a mapping function.
         /// The mapper is only called when <c>Success</c>; otherwise short-circuits with the existing error.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var doubled = Result&lt;string, int&gt;.Success(21).Map(x => x * 2); // Success(42)
+        /// var err     = Result&lt;string, int&gt;.Error("fail").Map(x => x * 2); // Error("fail")
+        /// </code>
+        /// </example>
         public Result<TError, TOut> Map<TOut>(Func<TSuccess, TOut> mapSuccess)
             => Match(
                 Result<TError, TOut>.Error,
@@ -66,6 +105,12 @@ namespace Svan.Monads
         /// Map the error value to a new type using a mapping function.
         /// The mapper is only called when <c>Error</c>; otherwise short-circuits with the existing success value.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var upper   = Result&lt;string, int&gt;.Error("fail").MapError(e => e.ToUpper()); // Error("FAIL")
+        /// var success = Result&lt;string, int&gt;.Success(42).MapError(e => e.ToUpper());   // Success(42)
+        /// </code>
+        /// </example>
         public Result<TOut, TSuccess> MapError<TOut>(Func<TError, TOut> mapError)
             => Match(
                 error => Result<TOut, TSuccess>.Error(mapError(error)),
@@ -76,6 +121,12 @@ namespace Svan.Monads
         /// </summary>
         /// <param name="do">An action that takes a single parameter of <see cref="TSuccess"/></param>
         /// <returns>The current state of the Result</returns>
+        /// <example>
+        /// <code>
+        /// Result&lt;string, int&gt;.Success(42).Do(n => Console.WriteLine(n));    // prints 42
+        /// Result&lt;string, int&gt;.Error("fail").Do(n => Console.WriteLine(n)); // nothing printed
+        /// </code>
+        /// </example>
         public Result<TError, TSuccess> Do(Action<TSuccess> @do)
         {
             if (IsSuccess())
@@ -104,6 +155,12 @@ namespace Svan.Monads
         /// <summary>
         /// Get the value of <c>TSuccess</c> or a default value from the supplied function.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var value    = Result&lt;string, int&gt;.Success(42).DefaultWith(_ => 0); // 42
+        /// var fallback = Result&lt;string, int&gt;.Error("fail").DefaultWith(_ => 0); // 0
+        /// </code>
+        /// </example>
         public TSuccess DefaultWith(Func<TError, TSuccess> fallback)
             => Match(fallback, success => success);
 
@@ -116,6 +173,12 @@ namespace Svan.Monads
         /// <summary>
         /// Get the value of <c>TSuccess</c> or throw a <see cref="NullReferenceException"/>.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var value = Result&lt;string, int&gt;.Success(42).OrThrow(); // 42
+        /// Result&lt;string, int&gt;.Error("fail").OrThrow();           // throws InvalidOperationException
+        /// </code>
+        /// </example>
         public TSuccess OrThrow()
             => Match(
                 error => throw new InvalidOperationException($"Expected a successful value of {typeof(TSuccess).Name} but was {error}."),
@@ -124,6 +187,12 @@ namespace Svan.Monads
         /// <summary>
         /// Fold into value of type <c>TOut</c> with supplied functions for case <c>TError</c> and case <c>TSuccess</c>.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var msg = Result&lt;string, int&gt;.Success(42).Fold(e => $"error: {e}", n => $"got {n}"); // "got 42"
+        /// var err = Result&lt;string, int&gt;.Error("oops").Fold(e => $"error: {e}", n => $"got {n}"); // "error: oops"
+        /// </code>
+        /// </example>
         public TOut Fold<TOut>(Func<TError, TOut> caseError, Func<TSuccess, TOut> caseSuccess)
             => Match(caseError, caseSuccess);
 
@@ -226,9 +295,14 @@ namespace Svan.Monads
         }
 
         /// <summary>
-        /// Downcast to an <c>Option&lt;TSuccess&gt;</c>. When the result is <c>Error</c> it will return <c>None</c>.
+        /// Downcast to an <see cref="Option{T}"/>. When the result is <c>Error</c> it will return <c>None</c>.
         /// </summary>
-        /// <returns></returns>
+        /// <example>
+        /// <code>
+        /// var some = Result&lt;string, int&gt;.Success(42).ToOption(); // Some(42)
+        /// var none = Result&lt;string, int&gt;.Error("fail").ToOption(); // None
+        /// </code>
+        /// </example>
         public Option<TSuccess> ToOption()
             => Match(
                 _ => Option<TSuccess>.None(),
